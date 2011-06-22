@@ -1,0 +1,6 @@
+This is a plugin for OpenTSDB to collect resource metrics about Hadoop MapReduce jobs.
+This is a part of Otus tool, you can find in the following URL:
+http://www.pdl.cmu.edu/Otus/index.shtml
+
+The original OpenTSDB web page is in:
+http://www.opentsdb.net/tcollector.html

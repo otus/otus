@@ -1,0 +1,96 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+ <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Otus Monitoring Tool</title>
+    <link rel="stylesheet" type="text/css" href="../media/lib/css/jquery.ui.css"/>
+    <link rel="stylesheet" type="text/css" href="../media/lib/css/jquery.jqplot.min.css"/>    
+    <link rel="stylesheet" type="text/css" href="../media/lib/jcalendar/css/jscal2.css" />
+    <link rel="stylesheet" type="text/css" href="../media/lib/jcalendar/css/border-radius.css" />
+    <!--[if lte IE 8]><script language="javascript" type="text/javascript" src="../excanvas.min.js"></script><![endif]-->
+    <script language="javascript" type="text/javascript" src="../media/lib/jquery/jquery.js"></script>
+    <script language="javascript" type="text/javascript" src="../media/lib/jquery/jquery.jqplot.js"></script>
+    <script language="javascript" type="text/javascript" src="../media/lib/jquery/jquery.ui.min.js"></script>
+	<script type="text/javascript" src="../media/lib/jquery/plugins/jqplot.cursor.min.js"></script>
+	<script type="text/javascript" src="../media/lib/jquery/plugins/jqplot.dateAxisRenderer.min.js"></script>
+	<script type="text/javascript" src="../media/lib/jquery/plugins/jqplot.highlighter.min.js"></script>
+	<script type="text/javascript" src="../media/lib/jquery/plugins/jqplot.canvasTextRenderer.min.js"></script>
+	<script type="text/javascript" src="../media/lib/jquery/plugins/jqplot.canvasAxisLabelRenderer.min.js"></script>		
+    <script language="javascript" type="text/javascript" src="../media/lib/jcalendar/js/jscal2.js"></script>
+	<script language="javascript" type="text/javascript" src="../media/lib/jcalendar/js/lang/en.js"></script>
+ 	<script language="javascript" type="text/javascript" src="../media/lib/tsd/configuration.js"></script>		
+ 	<script language="javascript" type="text/javascript" src="../media/lib/tsd/util.js"></script>	
+ 	<script language="javascript" type="text/javascript" src="../media/lib/tsd/query.js"></script>
+ </head>
+ <body>
+ 	<div>
+    <h1>Node Overview</h1>
+ 		
+    Time Range From <input size="20" id="cs" name="cs" value="{{cs}}"/><button id="cs_btn" type="button">...</button>
+    To   <input size="20" id="ce" name="ce" value="{{ce}}"/><button id="ce_btn" type="button">...</button>
+    <script type="text/javascript">//<![CDATA[
+       var cal = Calendar.setup({
+          onSelect: function(cal) { cal.hide() },
+          showTime: true,
+          minuteStep: 1
+      });
+      cal.manageFields("cs_btn", "cs", "%Y/%m/%d-%H:%M:%S");
+      cal.manageFields("ce_btn", "ce", "%Y/%m/%d-%H:%M:%S");
+    //]]></script>
+    <br>
+    Metric Name
+    <select id="metric">
+    	<option value='cpu_user'>User CPU</option>
+    	<option value='cpu_system'>System CPU</option>
+    	<option value='vmrss'>Resident Memory</option>
+     	<option value='vmsize'>Virtual Memory</option>
+     	<option value='readbytesrate'>Disk I/O Read</option>
+      	<option value='writebytesrate'>Disk I/O Write</option>
+    </select>
+    Host ID <input type="text" size="20" id="hostid" name="hostid"/>    
+    MapReduce Job ID <input type="text" size="20" id="mrjobid" name="mrjobid"/>
+	<button type="button" onclick=freshAll()> Go </button>
+	</div>
+    <div id="nodeview" style="font-size:150%;width:800px;height:600px;"></div>
+    
+    <script type="text/javascript">
+    	// Initialize jobid suggestion
+
+    	$("#metric").autocomplete( {
+    		source: MetricList
+    	});
+    	
+     	$("#hostid").autocomplete( {
+    		source: ServerList 
+    	});
+
+    	//TODO: add mrjob suggestion
+    	$("#mrjobid").autocomplete( {
+    		delay: 100,
+    		source: function(request, response) {
+    			$.getJSON(SuggestURL+"&term="+request.term+"&callback=?", function(data) {
+    				response(data);	
+    			});
+    		}
+    	});
+    	
+    	// Initialize cluster view
+		$("#metric").val(MetricList[0]);
+		$("#hostid").val(ServerList[0]);
+    	
+		var conf = new Object();
+    	conf.aggfunc = "sum";
+    	conf.isRate = false;
+    	conf.downSampe = null;
+    	conf.proclist = ProcessList;
+    	freshAll();
+    	
+    	function freshAll() {
+    		conf.metric = getObjStrValue("#metric", MetricList[0]);
+    		conf.joblist = [getObjStrValue("#mrjobid", null)];
+    		conf.hostid = getObjStrValue("#hostid", ServerList[0]);	
+	   		renderView($("#cs").val(), $("#ce").val(), getNodeView, conf, "nodeview");    		
+    	}
+    </script>
+ </body>
+</html>

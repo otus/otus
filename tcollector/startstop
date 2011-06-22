@@ -1,0 +1,131 @@
+#!/bin/bash
+
+# Semi Universal start-stop script
+
+TSD_HOST=localhost
+TCOLLECTOR_PATH=${TCOLLECTOR_PATH-'/home/kair/Code/tcollector'}
+test -n "$TSD_HOST" || {
+    echo >&2 "TSD_HOST is not set in $0"
+    exit 1
+}
+
+HOSTNAME=$(hostname)
+PIDFILE=${PIDFILE-'/var/run/tcollector.pid'}
+PROG=$TCOLLECTOR_PATH/tcollector.py
+LOG=${LOG-'/var/log/tcollector.log'}
+ARGS="-c $TCOLLECTOR_PATH/collectors -H $TSD_HOST -t host=$HOSTNAME -P $PIDFILE"
+
+# Sanity checks.
+test -d "$TCOLLECTOR_PATH" || {
+    echo >&2 "No such directory: $TCOLLECTOR_PATH"
+    echo >&2 "You might need to set the TCOLLECTOR_PATH variable in $0"
+    exit 2
+}
+
+test -f "$PROG" || {
+    echo >&2 "No such file: $PROG"
+    echo >&2 "You might need to set the TCOLLECTOR_PATH variable in $0"
+    exit 3
+}
+
+for i in "$PIDFILE" "$LOG"; do
+    # If the file doesn't exist, check that we have write access to its parent
+    # directory to be able to create it.
+    test -e "$i" || i=`dirname "$i"`
+    test -w "$i" || {
+        echo >&2 "$0: error: Cannot write to $i"
+        exit 4
+    }
+done
+
+which_python () {
+    for python in /usr/bin/python2.6 /usr/bin/python2.5 /usr/bin/python; do
+        test -x "$python" && echo "$python" && return
+    done
+    echo >&2 'Could not find a Python interpreter'
+    exit 1
+}
+
+PYTHON=$(which_python)
+
+start () {
+    echo "Starting $PROG"
+    $PYTHON $PROG $ARGS >> $LOG 2>&1 &
+}
+
+stop () {
+    echo "Stopping $PROG"
+    if [[ -r "$PIDFILE" ]]; then
+        PID=$(< "$PIDFILE")
+        kill $1 $PID
+        sleep 1
+    fi
+    # Check also for instances not started with a pidfile
+    # include only python processes
+    pgrep -f "/usr/bin/python.* $PROG -c" |grep -vw "$PID" | xargs -r kill $1
+}
+
+status () {
+    if [[ -r "$PIDFILE" ]]; then
+        if kill -0 $(< $PIDFILE) 2>/dev/null; then
+            echo "$PROG" running
+            return 0
+        fi
+    fi
+    if [[ -n $(pgrep -f "/usr/bin/python.* $PROG -c") ]]; then
+        echo "$PROG" running
+        return 0
+    fi
+    return 1
+}
+
+forcerestart () {
+    stop
+    try=1
+    sleep 1
+    while status; do
+        try=$((try + 1))
+        if [[ $try -gt 3 ]]; then
+            stop -9
+        else
+            stop
+        fi
+        echo "Waiting for $PROG to die.."
+        sleep 5
+    done
+    start
+}
+
+case $1 in
+    start)  status || start
+        ;;
+    force-restart)
+        forcerestart
+        ;;
+    restart)
+        # tcollector already respawns collectors if they
+        # have changed on-disk, and kills old ones/starts
+        # new ones.  The only thing tcollector doesn't do
+        # is restart itself if itself has changed. For a more
+        # graceful restart, just make sure we're running and
+        # restart only if tcollector is newer on disk than
+        # since it started.  This doesn't check for dependencies
+        # like asyncproc.py, but that's ok.
+        if status; then
+            newer=$(find $PROG -newer $PIDFILE | wc -l)
+            if [[ $newer -gt 0 ]]; then
+                forcerestart
+            fi
+        else
+            start
+        fi
+        ;;
+    stop) stop
+        ;;
+    status) status
+            exit $?
+        ;;
+    *)  echo >&2 "usage: $0 <start|stop|restart|status|force-restart>"
+        exit 1
+        ;;
+esac
