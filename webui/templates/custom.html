@@ -1,0 +1,161 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+ <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Otus Monitoring Tool</title>
+    <link rel="stylesheet" type="text/css" href="../media/lib/css/jquery.ui.css"/>
+    <link rel="stylesheet" type="text/css" href="../media/lib/css/jquery.jqplot.min.css"/>    
+    <link rel="stylesheet" type="text/css" href="../media/lib/jcalendar/css/jscal2.css" />
+    <link rel="stylesheet" type="text/css" href="../media/lib/jcalendar/css/border-radius.css" />
+    <!--[if lte IE 8]><script language="javascript" type="text/javascript" src="../excanvas.min.js"></script><![endif]-->
+    <script language="javascript" type="text/javascript" src="../media/lib/jquery/jquery.js"></script>
+    <script language="javascript" type="text/javascript" src="../media/lib/jquery/jquery.jqplot.js"></script>
+    <script language="javascript" type="text/javascript" src="../media/lib/jquery/jquery.ui.min.js"></script>
+	<script type="text/javascript" src="../media/lib/jquery/plugins/jqplot.cursor.min.js"></script>
+	<script type="text/javascript" src="../media/lib/jquery/plugins/jqplot.dateAxisRenderer.min.js"></script>
+	<script type="text/javascript" src="../media/lib/jquery/plugins/jqplot.highlighter.min.js"></script>
+	<script type="text/javascript" src="../media/lib/jquery/plugins/jqplot.canvasTextRenderer.min.js"></script>
+	<script type="text/javascript" src="../media/lib/jquery/plugins/jqplot.canvasAxisLabelRenderer.min.js"></script>		
+    <script language="javascript" type="text/javascript" src="../media/lib/jcalendar/js/jscal2.js"></script>
+	<script language="javascript" type="text/javascript" src="../media/lib/jcalendar/js/lang/en.js"></script>
+ 	<script language="javascript" type="text/javascript" src="../media/lib/tsd/configuration.js"></script>		
+ 	<script language="javascript" type="text/javascript" src="../media/lib/tsd/util.js"></script>	
+ 	<script language="javascript" type="text/javascript" src="../media/lib/tsd/query.js"></script>
+	<style> 
+	#metrics { margin-top: 1em; font-size: 5; }
+	#metrics li .ui-icon-close { float: left; margin: 0.4em 0.2em 0 0; cursor: pointer; }
+	#add_metric { cursor: pointer; }
+	</style>  	
+	<script type="text/javascript">
+	$(function() {
+		var nMetricTab = 2;
+		var metricTabs = $("#metrics").tabs({
+			tabTemplate: "<li><a href='#{href}'>#{label}</a> <span class='ui-icon ui-icon-close'>Remove Tab</span></li>",
+			add: function( event, ui ) {
+				var content = "";
+				content += "Metric Name <input type=\"text\" id=\"metric-"+nMetricTab+"-name\"/>";
+		    	content += "Tags <input type=\"text\" id=\"metric-"+nMetricTab+"-tags\"/>";
+				content += "Rate <input type=\"checkbox\" id=\"metric-"+nMetricTab+"-isRate\"/>";
+    			content += "Aggregation <select id='metric-"+nMetricTab+"-agg'><option value='sum'>Sum</option><option value='min'>Min</option><option value='max'>Max</option><option value='avg'>Avg</option></select>";				
+				$(ui.panel).append(content);
+			}			
+		});
+		function addMetric() {
+			metricTabs.tabs("add", "#metric-"+nMetricTab, nMetricTab);
+			nMetricTab++;
+		}
+		$( "#addMetric" )
+			.button()
+			.click(function() {
+				addMetric();
+			});
+		$("#metrics span.ui-icon-close").live( "click", function() {
+			var index = $( "li", metricTabs).index( $( this ).parent() );
+			metricTabs.tabs( "remove", index );
+		});
+		
+		function getQueries(intv_agg) {
+			var queries = new Array();
+			$("div", metricTabs).each(
+				function(index) {
+					var tabid = "#"+$(this).attr("id");
+					if ($(tabid+"-isRate").attr("checked")) {
+						queries.push("m="+$(tabid+"-agg").val()+intv_agg+":rate:"+$(tabid+"-name").val()+"{"+$(tabid+"-tags").val()+"}");							
+					} else {
+						queries.push("m="+$(tabid+"-agg").val()+intv_agg+":"+$(tabid+"-name").val()+"{"+$(tabid+"-tags").val()+"}");
+					}
+				}
+			);
+			return queries;			
+		}
+		
+		$( "#load" )
+			.button()
+			.click(function() {
+				var conf = new Object();
+				conf.queries = getQueries("");
+				renderView($("#customview-cs").val(), $("#customview-ce").val(), getCustomizedView, conf, "customview");
+			});
+			
+		$( "#testurl" )
+			.button()
+			.click(function() {
+				var conf = new Object();
+				conf.queries = getQueries("");
+				alert(getCustomizedView($("#customview-cs").val(), $("#customview-ce").val(), conf).uri);
+			});
+
+		var $addGraphDialog = $( "#addGraphDialog" ).dialog({
+			autoOpen: false,
+			modal: true,
+			buttons: {
+				Add: function() {
+					$addGraphDialog.dialog("close");						
+					addGraphToDashboard();
+				},
+				Cancel: function() {
+					$addGraphDialog.dialog("close");
+				}
+			},
+			open: function() {
+				$("#targetdashboard").focus();
+			}
+		});
+
+		function addGraphToDashboard() {
+			setGraphToDashboard($("#targetdashboard").val(), $("#targetgraph").val(), getQueries(""));
+			if (handleDashboardToReload != null) {
+				handleDashboardToReload($("#targetdashboard").val());
+			}
+		};
+			
+		$( "#addtodashboard" )
+			.button()
+			.click(function() {
+				$addGraphDialog.dialog( "open" );
+			});		
+	});
+ 	</script>
+ </head>
+ <body>
+ 	<div>
+    Time Range 
+    From <input size="20" id="customview-cs" name="cs" value="{{cs}}"/><button id="cs_btn" type="button">...</button>
+    To   <input size="20" id="customview-ce" name="ce" value="{{ce}}"/><button id="ce_btn" type="button">...</button>
+    <script type="text/javascript">//<![CDATA[
+       var cal = Calendar.setup({
+          onSelect: function(cal) { cal.hide() },
+          showTime: true,
+          minuteStep: 1
+      });
+      cal.manageFields("cs_btn", "customview-cs", "%Y/%m/%d-%H:%M:%S");
+      cal.manageFields("ce_btn", "customview-ce", "%Y/%m/%d-%H:%M:%S");
+    //]]></script>
+    <br>
+    </div>
+    <div id="metrics">
+    	<ul>
+    		<li><a href="#metric-1">1</a><span class="ui-icon ui-icon-close">Remove Tab</span></li>
+    	</ul>
+    	<div id="metric-1">
+		    Metric Name <input type="text" id="metric-1-name"/>
+		    Tags <input type="text" id="metric-1-tags"/>
+			Rate <input type="checkbox" id="metric-1-isRate"/>
+			Aggregation <select id="metric-1-agg"><option value="sum">Sum</option><option value="min">Min</option><option value="max">Max</option><option value="avg">Avg</option></select>			
+    	</div>
+	</div>
+	<button id="addMetric"><span class="ui-button-text">Add Metric</span></button>		
+	<button id="load"><span class="ui-button-text">Load</span></button>
+	<button id="testurl"><span class="ui-button-text">URL</span></button>
+	<div id="addGraphDialog" title="Add Graph To Dashboard"> 
+			<fieldset class="ui-helper-reset"> 
+				<label for="targetdashboard">Dashboard Name</label> 
+				<input type="text" name="targetdashboard" id="targetdashboard" value="" class="ui-widget-content ui-corner-all" />
+				<label for="targetgraph">Graph Name</label> 
+				<input type="text" name="targetgraph" id="targetgraph" value="" class="ui-widget-content ui-corner-all" /> 				 
+			</fieldset> 
+	</div> 
+	<button id="addtodashboard"><span class="ui-button-text">AddToDashboard</span></button>	
+	<div id="customview" style="font-size:150%;width:800px;height:600px;"></div>
+ </body>
+</html> 

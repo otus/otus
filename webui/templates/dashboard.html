@@ -1,0 +1,68 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+ <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Otus Monitoring Tool</title>
+    <link rel="stylesheet" type="text/css" href="../../media/lib/css/jquery.ui.css"/>
+    <link rel="stylesheet" type="text/css" href="../../media/lib/css/jquery.jqplot.min.css"/>    
+    <link rel="stylesheet" type="text/css" href="../../media/lib/jcalendar/css/jscal2.css" />
+    <link rel="stylesheet" type="text/css" href="../../media/lib/jcalendar/css/border-radius.css" />
+    <!--[if lte IE 8]><script language="javascript" type="text/javascript" src="../excanvas.min.js"></script><![endif]-->
+    <script language="javascript" type="text/javascript" src="../../media/lib/jquery/jquery.js"></script>
+    <script language="javascript" type="text/javascript" src="../../media/lib/jquery/jquery.jqplot.js"></script>
+    <script language="javascript" type="text/javascript" src="../../media/lib/jquery/jquery.ui.min.js"></script>
+	<script type="text/javascript" src="../../media/lib/jquery/plugins/jqplot.cursor.min.js"></script>
+	<script type="text/javascript" src="../../media/lib/jquery/plugins/jqplot.dateAxisRenderer.min.js"></script>
+	<script type="text/javascript" src="../../media/lib/jquery/plugins/jqplot.highlighter.min.js"></script>
+	<script type="text/javascript" src="../../media/lib/jquery/plugins/jqplot.canvasTextRenderer.min.js"></script>
+	<script type="text/javascript" src="../../media/lib/jquery/plugins/jqplot.canvasAxisLabelRenderer.min.js"></script>	
+    <script language="javascript" type="text/javascript" src="../../media/lib/jcalendar/js/jscal2.js"></script>
+	<script language="javascript" type="text/javascript" src="../../media/lib/jcalendar/js/lang/en.js"></script>
+	<script language="javascript" type="text/javascript" src="../../media/lib/tsd/configuration.js"></script> 	
+  	<script language="javascript" type="text/javascript" src="../../media/lib/tsd/util.js"></script> 	
+ 	<script language="javascript" type="text/javascript" src="../../media/lib/tsd/query.js"></script>
+ </head>
+ <body>
+ 	<div>
+    Time Range From <input size="20" id="{{dashboardname}}-cs" name="cs" value="{{cs}}"/><button id="cs_btn" type="button">...</button>
+    To   <input size="20" id="{{dashboardname}}-ce" name="ce" value="{{ce}}"/><button id="ce_btn" type="button">...</button>
+    <script type="text/javascript">//<![CDATA[
+       var cal = Calendar.setup({
+          onSelect: function(cal) { cal.hide() },
+          showTime: true,
+          minuteStep: 1
+      });
+      cal.manageFields("cs_btn", "{{dashboardname}}-cs", "%Y/%m/%d-%H:%M:%S");
+      cal.manageFields("ce_btn", "{{dashboardname}}-ce", "%Y/%m/%d-%H:%M:%S");
+    //]]></script>
+    <button type="button" onclick=freshAll()> Go </button>
+	</div>
+    <div id="{{dashboardname}}-board">
+    	{% block dashboard %}
+    		{% for graph in graph_list %}
+		    	<div id="{{dashboardname}}-{{graph.graph_name}}" style="font-size:100%;width:400px;height:300px;"></div>   
+		    {% endfor %} 	
+    	{% endblock dashboard %}
+    </div>	
+    <div id="{{dashboardname}}-url">
+    	{% block url %}
+    		{% for graph in graph_list %}
+    			<p> {{graph.graph_url}}</p>
+    		{% endfor %}
+    	{% endblock url %}
+    </div>
+    <script type="text/javascript">
+    	// Initialize jobid suggestion
+    	freshAll();
+    	function freshAll() {
+    		var conf = new Object();
+    		{% block fresh %}
+    			{% for graph in graph_list %}
+    				conf.query = "{{graph.graph_url}}";
+	   				renderView($("#{{dashboardname}}-cs").val(), $("#{{dashboardname}}-ce").val(), getDashboardView, conf, "{{dashboardname}}-{{graph.graph_name}}");
+	   			{% endfor %}
+	   		{% endblock fresh %}
+    	}
+	</script>
+ </body>
+</html>

@@ -24,22 +24,20 @@
  </head>
  <body>
  	<div>
-    <h1>Cluster Overview</h1>
- 		
-    Time Range From <input size="20" id="cs" name="cs" value="{{cs}}"/><button id="cs_btn" type="button">...</button>
-    To   <input size="20" id="ce" name="ce" value="{{ce}}"/><button id="ce_btn" type="button">...</button>
+    Time Range From <input size="20" id="clusterview-cs" name="cs" value="{{cs}}"/><button id="cs_btn" type="button">...</button>
+    To   <input size="20" id="clusterview-ce" name="ce" value="{{ce}}"/><button id="ce_btn" type="button">...</button>
     <script type="text/javascript">//<![CDATA[
        var cal = Calendar.setup({
           onSelect: function(cal) { cal.hide() },
           showTime: true,
           minuteStep: 1
       });
-      cal.manageFields("cs_btn", "cs", "%Y/%m/%d-%H:%M:%S");
-      cal.manageFields("ce_btn", "ce", "%Y/%m/%d-%H:%M:%S");
+      cal.manageFields("cs_btn", "clusterview-cs", "%Y/%m/%d-%H:%M:%S");
+      cal.manageFields("ce_btn", "clusterview-ce", "%Y/%m/%d-%H:%M:%S");
     //]]></script>
     <br>
     Metric Name 
-    <select id="metric">
+    <select id="cluserview-metric">
     	<option value='cpu_user'>User CPU</option>
     	<option value='cpu_system'>System CPU</option>
     	<option value='vmrss'>Resident Memory</option>
@@ -47,7 +45,7 @@
      	<option value='readbytesrate'>Disk I/O Read</option>
       	<option value='writebytesrate'>Disk I/O Write</option>
     </select>
-    MapReduce Job ID <input type="text" size="20" id="mrjobid" name="mrjobid"/>
+    MapReduce Job ID <input type="text" size="15" id="clusterview-mrjobid" name="mrjobid"/>
 	<button type="button" onclick=freshAll()> Go </button>
 	</div>
     <div id="clusterview" style="font-size:150%;width:800px;height:600px;"></div>
@@ -55,13 +53,13 @@
     <script type="text/javascript">
     	// Initialize jobid suggestion
 
-    	$("#metric").autocomplete( {
+    	$("#clusterview-metric").autocomplete( {
     		delay: 100,
     		source: MetricList
     	});
     	
     	//TODO: add mrjob suggestion
-    	$("#mrjobid").autocomplete( {
+    	$("#clusterview-mrjobid").autocomplete( {
     		delay: 100,
     		source: function(request, response) {
     			$.getJSON(SuggestURL+"&term="+request.term+"&callback=?", function(data) {
@@ -71,7 +69,7 @@
     	});
     	
     	// Initialize cluster view
-		$("#metric").val(MetricList[0]);
+		$("#clusterview-metric").val(MetricList[0]);
     	
 		var conf = new Object();
     	conf.aggfunc = "sum";
@@ -81,9 +79,9 @@
     	freshAll();
     	
     	function freshAll() {
-    		conf.metric = getObjStrValue("#metric", MetricList[0]);
-    		conf.joblist = [getObjStrValue("#mrjobid", null)];
-	   		renderView($("#cs").val(), $("#ce").val(), getClusterView, conf, "clusterview");
+    		conf.metric = getObjStrValue("#clusterview-metric", MetricList[0]);
+    		conf.joblist = [getObjStrValue("#clusterview-mrjobid", null)];
+	   		renderView($("#clusterview-cs").val(), $("#clusterview-ce").val(), getClusterView, conf, "clusterview");
     	}
     </script>
  </body>

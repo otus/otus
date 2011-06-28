@@ -121,6 +121,33 @@ function getNodeView(startTime, endTime, conf) {
 	return ret;
 }
 
+function getCustomizedView(startTime, endTime, conf) {
+	ret = new Object();	
+	ret.uri = genQuery(startTime, endTime, conf.queries);
+	return ret;
+}
+
+function getDashboardView(startTime, endTime, conf) {
+	ret = new Object();
+	ret.uri = getOpenTSDBURL()+"start="+startTime+"&end="+endTime+"&ascii&injson&"+conf.query+"&callback=?";
+	return ret;
+}
+
+function setGraphToDashboard(dashboardName, graphName, queries) {
+	if (queries.length <= 0)
+		return;
+	var graphQuery = queries[0];
+	for (var i = 1; i < queries.length; ++i) {
+		graphQuery += "&"+queries[i];
+	}
+	$.get("update/", 
+		{dashboardname: dashboardName, graphname: graphName, graphquery: graphQuery},
+		function (data) {
+			alert("Add graph to "+dashboardName+" successfully.");
+		}
+	);
+}
+
 function getLabel(data) {
 	var labels = new Array();
 	for (var i = 0; i < data.length; ++i) {

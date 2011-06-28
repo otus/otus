@@ -68,20 +68,20 @@ Get otus running
   The otus plugin will collect the pid (process ID), uid (user ID) 
   and cmd (command line) of each process, and check whether
   pid, uid, cmd is matched with the properties specified in procmon.conf.
+  The line format is:
 
-  The line format is 
-      [pid PID_PROCESS] [uid UID_PROCESS] [npid PID_PROCESS] [nuid UID_PROCESS] cmd RE_PROCESS_COMMAND name PROCESS_NAME
+	[pid PID_PROCESS] [uid UID_PROCESS] [npid PID_PROCESS] [nuid UID_PROCESS] cmd RE_PROCESS_COMMAND name PROCESS_NAME
+
   
-      		pid PID_PROCESS: it specifies the process ID of monitored process is PID_PROCESS
-	  	npid PID_PROCESS: it specifies the process ID of monitored process is not PID_PROCESS
-  		uid PID_PROCESS: it specifies the user ID of monitored process is UID_PROCESS
-  		nuid PID_PROCESS: it specifies the user ID of monitored process is not UID_PROCESS
-  		cmd RE_PROCESS_COMMAND: it specifies the command line (in /proc/pid/cmdline) is matched with the regular expression: RE_PROCESS_COMMAND
-  		name PROCESS_NAME: it specifies the name that be finally shown in visual reports to identify the process. (e.g, the metric "TaskTracker's memory" will be recored as "process.vmrss proc=TaskTracker" in OpenTSDB).
+  	pid PID_PROCESS: it specifies the process ID of monitored process is PID_PROCESS
+	npid PID_PROCESS: it specifies the process ID of monitored process is not PID_PROCESS
+  	uid PID_PROCESS: it specifies the user ID of monitored process is UID_PROCESS
+  	nuid PID_PROCESS: it specifies the user ID of monitored process is not UID_PROCESS
+  	cmd RE_PROCESS_COMMAND: it specifies the command line (in /proc/pid/cmdline) is matched with the regular expression: RE_PROCESS_COMMAND
+	name PROCESS_NAME: it specifies the name that be finally shown in visual reports to identify the process. (e.g, the metric "TaskTracker's memory" will be recored as "process.vmrss proc=TaskTracker" in OpenTSDB).
   
 
-  In mrjob.conf, it specifies what Map-Reduce task processes should be monitored:
-  The property format is:
+  In mrjob.conf, it specifies what Map-Reduce task processes should be monitored. The property format is:
 	
   	[pid PID_PROCESS] [uid UID_PROCESS] nmapper NUMBER_OF_MAPPER_TASKS nreducer NUMBER_OF_REDUCER_TASKS
 
@@ -93,8 +93,8 @@ Get otus running
 3 Install otus web front-end:
   Otus web front-end is built by using Django web framework.
 
-  Install Django web framework: https://docs.djangoproject.com/en/dev/intro/install/
-  Install SQLLite: http://www.sqlite.org/download.html
+  Install Django web framework: https://docs.djangoproject.com/en/dev/intro/install/ .
+  Install SQLLite: http://www.sqlite.org/download.html .
   Quick install in debian/ubuntu:
 	
 	sudo apt-get install python-django
@@ -109,6 +109,7 @@ Get otus running
 
 
 2. Features that are coming soon:
+
 (a) JMX plugin for OpenTSDB to collect internal statistics of Hadoop software
 
 (b) Vistual Reports about internal statistics of Hadoop software

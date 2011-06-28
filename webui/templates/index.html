@@ -1,0 +1,119 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+ <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Otus Monitoring Tool</title>
+    <link rel="stylesheet" type="text/css" href="../media/lib/css/jquery.ui.css"/>
+    <link rel="stylesheet" type="text/css" href="../media/lib/css/jquery.jqplot.min.css"/>    
+    <link rel="stylesheet" type="text/css" href="../media/lib/jcalendar/css/jscal2.css" />
+    <link rel="stylesheet" type="text/css" href="../media/lib/jcalendar/css/border-radius.css" />
+    <!--[if lte IE 8]><script language="javascript" type="text/javascript" src="../excanvas.min.js"></script><![endif]-->
+    <script language="javascript" type="text/javascript" src="../media/lib/jquery/jquery.js"></script>
+    <script language="javascript" type="text/javascript" src="../media/lib/jquery/jquery.jqplot.js"></script>
+    <script language="javascript" type="text/javascript" src="../media/lib/jquery/jquery.ui.min.js"></script>
+	<script type="text/javascript" src="../media/lib/jquery/plugins/jqplot.cursor.min.js"></script>
+	<script type="text/javascript" src="../media/lib/jquery/plugins/jqplot.dateAxisRenderer.min.js"></script>
+	<script type="text/javascript" src="../media/lib/jquery/plugins/jqplot.highlighter.min.js"></script>
+	<script type="text/javascript" src="../media/lib/jquery/plugins/jqplot.canvasTextRenderer.min.js"></script>
+	<script type="text/javascript" src="../media/lib/jquery/plugins/jqplot.canvasAxisLabelRenderer.min.js"></script>		
+    <script language="javascript" type="text/javascript" src="../media/lib/jcalendar/js/jscal2.js"></script>
+	<script language="javascript" type="text/javascript" src="../media/lib/jcalendar/js/lang/en.js"></script>
+ 	<script language="javascript" type="text/javascript" src="../media/lib/tsd/configuration.js"></script>		
+ 	<script language="javascript" type="text/javascript" src="../media/lib/tsd/util.js"></script>	
+ 	<script language="javascript" type="text/javascript" src="../media/lib/tsd/query.js"></script>
+ 	<style>
+ 		#mainTab li .add { float: left; cursor: pointer; }
+ 	</style>
+ 	<script type="text/javascript">
+ 		$(document).ready(function() {
+ 			var mainTab = $("#mainTab").tabs({
+ 				cache : true,
+				tabTemplate: "<li><a href='#{href}'>#{label}</a> <span class='ui-icon ui-icon-close'>Remove Tab</span></li>",
+				add: function( event, ui ) {
+					mainTab.tabs('select', '#' + ui.panel.id);					
+				}
+ 			});
+ 			
+			var $addTabDialog = $( "#addTabDialog" ).dialog({
+				autoOpen: false,
+				modal: true,
+				buttons: {
+					Add: function() {
+						$addTabDialog.dialog("close");						
+						addTab();
+					},
+					Cancel: function() {
+						$addTabDialog.dialog("close");
+					}
+				},
+				open: function() {
+					$("#newdashboard").focus();
+				}
+			});
+
+			$( "#mainTab span.add" ).live( "click", function() {
+				$addTabDialog.dialog( "open" );
+ 			});
+
+			var tabName = new Array("Query", "ClusterView", "NodeView");
+			function addTab() {
+				var dashboardName = $("#newdashboard").val();
+				var pos = mainTab.tabs("length");
+				if (pos < tabName.length) {
+					tabName[pos] = dashboardName;
+				} else {
+					tabName.push(dashboardName);
+				}
+				mainTab.tabs("add", "dashboard/"+dashboardName, dashboardName, pos-1);
+			};
+			
+			function setTabToReload(dashboardname) {
+				for (var i = 0; i < tabName.length; ++i)
+					if (tabName[i] == dashboardname) {
+						if (i < mainTab.tabs("length")) {
+							mainTab.tabs("select", i);
+							mainTab.tabs("load", i);	
+						}						
+					}
+			};
+			
+			handleDashboardToReload = setTabToReload;
+
+			function reloadTab() {
+				var index = mainTab.tabs("option", "selected");
+				mainTab.tabs("load", index);				
+			};
+			
+			/*
+			$( "#reload" )
+			.button()
+			.click(function() {
+				reloadTab();
+			});
+			*/
+			
+			$( "#mainTab span.ui-icon-close" ).live( "click", function() {
+				var index = $( "li", mainTab).index( $( this ).parent() );
+				mainTab.tabs("remove", index);
+ 			}); 			
+ 		}); 			
+ 	</script>
+ 	
+ </head>
+ <body>
+	<div id="addTabDialog" title="Add Dashboard"> 
+			<fieldset class="ui-helper-reset"> 
+				<label for="newdashboard">Title</label> 
+				<input type="text" name="newdashboard" id="newdashboard" value="" class="ui-widget-content ui-corner-all" /> 
+			</fieldset> 
+	</div> 
+ 	<div id = "mainTab">
+ 		<ul>
+ 			<li><a href="custom.html"><span>Query</span></a></li>         	
+ 			<li><a href="cluster.html"><span>Cluster View</span></a></li>
+         	<li><a href="node.html"><span>Node View</span></a></li>
+    		<li><a href="#w"></a><span class="add">+</span></li>
+		</ul>
+ 	</div>
+ </body>
+</html> 

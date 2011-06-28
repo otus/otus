@@ -24,22 +24,20 @@
  </head>
  <body>
  	<div>
-    <h1>Node Overview</h1>
- 		
-    Time Range From <input size="20" id="cs" name="cs" value="{{cs}}"/><button id="cs_btn" type="button">...</button>
-    To   <input size="20" id="ce" name="ce" value="{{ce}}"/><button id="ce_btn" type="button">...</button>
+    Time Range From <input size="20" id="nodeview-cs" name="cs" value="{{cs}}"/><button id="cs_btn" type="button">...</button>
+    To   <input size="20" id="nodeview-ce" name="ce" value="{{ce}}"/><button id="ce_btn" type="button">...</button>
     <script type="text/javascript">//<![CDATA[
        var cal = Calendar.setup({
           onSelect: function(cal) { cal.hide() },
           showTime: true,
           minuteStep: 1
       });
-      cal.manageFields("cs_btn", "cs", "%Y/%m/%d-%H:%M:%S");
-      cal.manageFields("ce_btn", "ce", "%Y/%m/%d-%H:%M:%S");
+      cal.manageFields("cs_btn", "nodeview-cs", "%Y/%m/%d-%H:%M:%S");
+      cal.manageFields("ce_btn", "nodeview-ce", "%Y/%m/%d-%H:%M:%S");
     //]]></script>
     <br>
     Metric Name
-    <select id="metric">
+    <select id="nodeview-metric">
     	<option value='cpu_user'>User CPU</option>
     	<option value='cpu_system'>System CPU</option>
     	<option value='vmrss'>Resident Memory</option>
@@ -47,8 +45,8 @@
      	<option value='readbytesrate'>Disk I/O Read</option>
       	<option value='writebytesrate'>Disk I/O Write</option>
     </select>
-    Host ID <input type="text" size="20" id="hostid" name="hostid"/>    
-    MapReduce Job ID <input type="text" size="20" id="mrjobid" name="mrjobid"/>
+    Host ID <input type="text" size="10" id="nodeview-hostid" name="hostid"/>    
+    MapReduce Job ID <input type="text" size="15" id="nodeview-mrjobid" name="mrjobid"/>
 	<button type="button" onclick=freshAll()> Go </button>
 	</div>
     <div id="nodeview" style="font-size:150%;width:800px;height:600px;"></div>
@@ -56,16 +54,16 @@
     <script type="text/javascript">
     	// Initialize jobid suggestion
 
-    	$("#metric").autocomplete( {
+    	$("#nodeview-metric").autocomplete( {
     		source: MetricList
     	});
     	
-     	$("#hostid").autocomplete( {
+     	$("#nodeview-hostid").autocomplete( {
     		source: ServerList 
     	});
 
     	//TODO: add mrjob suggestion
-    	$("#mrjobid").autocomplete( {
+    	$("#nodeview-mrjobid").autocomplete( {
     		delay: 100,
     		source: function(request, response) {
     			$.getJSON(SuggestURL+"&term="+request.term+"&callback=?", function(data) {
@@ -75,8 +73,8 @@
     	});
     	
     	// Initialize cluster view
-		$("#metric").val(MetricList[0]);
-		$("#hostid").val(ServerList[0]);
+		$("#nodeview-metric").val(MetricList[0]);
+		$("#nodeview-hostid").val(ServerList[0]);
     	
 		var conf = new Object();
     	conf.aggfunc = "sum";
@@ -86,10 +84,10 @@
     	freshAll();
     	
     	function freshAll() {
-    		conf.metric = getObjStrValue("#metric", MetricList[0]);
-    		conf.joblist = [getObjStrValue("#mrjobid", null)];
-    		conf.hostid = getObjStrValue("#hostid", ServerList[0]);	
-	   		renderView($("#cs").val(), $("#ce").val(), getNodeView, conf, "nodeview");    		
+    		conf.metric = getObjStrValue("#nodeview-metric", MetricList[0]);
+    		conf.joblist = [getObjStrValue("#nodeview-mrjobid", null)];
+    		conf.hostid = getObjStrValue("#nodeview-hostid", ServerList[0]);	
+	   		renderView($("#nodeview-cs").val(), $("#nodeview-ce").val(), getNodeView, conf, "nodeview");    		
     	}
     </script>
  </body>
