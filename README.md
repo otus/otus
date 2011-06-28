@@ -72,14 +72,14 @@ Get otus running
 
 	[pid PID_PROCESS] [uid UID_PROCESS] [npid PID_PROCESS] [nuid UID_PROCESS] cmd RE_PROCESS_COMMAND name PROCESS_NAME
 
-  
+  The meaning of each option in the line property is:
+
   	pid PID_PROCESS: it specifies the process ID of monitored process is PID_PROCESS
 	npid PID_PROCESS: it specifies the process ID of monitored process is not PID_PROCESS
   	uid PID_PROCESS: it specifies the user ID of monitored process is UID_PROCESS
   	nuid PID_PROCESS: it specifies the user ID of monitored process is not UID_PROCESS
   	cmd RE_PROCESS_COMMAND: it specifies the command line (in /proc/pid/cmdline) is matched with the regular expression: RE_PROCESS_COMMAND
 	name PROCESS_NAME: it specifies the name that be finally shown in visual reports to identify the process. (e.g, the metric "TaskTracker's memory" will be recored as "process.vmrss proc=TaskTracker" in OpenTSDB).
-  
 
   In mrjob.conf, it specifies what Map-Reduce task processes should be monitored. The property format is:
 	
@@ -108,7 +108,8 @@ Get otus running
 	ServerList: a list of host names that are monitored by tcollector 
 
 
-2. Features that are coming soon:
+Features coming soon:
+===========
 
 (a) JMX plugin for OpenTSDB to collect internal statistics of Hadoop software
 
