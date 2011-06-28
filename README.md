@@ -17,6 +17,8 @@ uses Django and SQLlite for web front-end.
 
 Get opentsdb running
 --------------------
+Download from original source:
+
 1 Get hbase-0.90.X - we've been using hbase-0.90.2
 
 	# From http://hbase.apache.org/book/quickstart.html. Pick a mirror at http://www.apache.org/dyn/closer.cgi/hbase/ and run:
@@ -44,9 +46,22 @@ Get opentsdb running
 	./src/tsdb mkmetric http.hits sockets.simultaneous lolcats.viewed
 	./src/tsdb tsd --port=4242 --staticroot=build/staticroot --cachedir=/tmp/tsd
 
-4 Create new metrics for Otus in OpenTSDB
+4 Download patch for Otus
+
+
+5 Create new metrics for Otus in OpenTSDB:
+
+Use the version in Otus trunk:
 	
-		
+	git clone git://github.com/otus/otus.git
+	cd opentsdb
+	make || make MD5=md5sum
+	make staticroot
+	cd script
+	env COMPRESSION=none HBASE_HOME=../hbase-0.90.X ./src/create_table.sh
+	sh runtsdb.sh
+	python createmet.py
+
 
 Get otus running
 ----------------------
