@@ -65,25 +65,30 @@ Get otus running
   Configure otus plugin:
   In procmon.conf, it specifies what long running processes should be monitored.
   It contains multiple lines, each line specifies a property of a particular process.
-  The otus plugin will collect the pid (process ID), uid (user ID) and cmd (command line) of each process, and check whether
+  The otus plugin will collect the pid (process ID), uid (user ID) 
+  and cmd (command line) of each process, and check whether
   pid, uid, cmd is matched with the properties specified in procmon.conf.
+
   The line format is 
       [pid PID_PROCESS] [uid UID_PROCESS] [npid PID_PROCESS] [nuid UID_PROCESS] cmd RE_PROCESS_COMMAND name PROCESS_NAME
-  pid PID_PROCESS: it specifies the process ID of monitored process is PID_PROCESS
-  npid PID_PROCESS: it specifies the process ID of monitored process is not PID_PROCESS
-  uid PID_PROCESS: it specifies the user ID of monitored process is UID_PROCESS
-  nuid PID_PROCESS: it specifies the user ID of monitored process is not UID_PROCESS
-  cmd RE_PROCESS_COMMAND: it specifies the command line (in /proc/pid/cmdline) is matched with the regular expression: RE_PROCESS_COMMAND
-  name PROCESS_NAME: it specifies the name that be finally shown in visual reports to identify the process. 
-          (e.g, the metric "TaskTracker's memory" will be recored as "process.vmrss proc=TaskTracker" in OpenTSDB).
+  
+      		pid PID_PROCESS: it specifies the process ID of monitored process is PID_PROCESS
+	  	npid PID_PROCESS: it specifies the process ID of monitored process is not PID_PROCESS
+  		uid PID_PROCESS: it specifies the user ID of monitored process is UID_PROCESS
+  		nuid PID_PROCESS: it specifies the user ID of monitored process is not UID_PROCESS
+  		cmd RE_PROCESS_COMMAND: it specifies the command line (in /proc/pid/cmdline) is matched with the regular expression: RE_PROCESS_COMMAND
+  		name PROCESS_NAME: it specifies the name that be finally shown in visual reports to identify the process. (e.g, the metric "TaskTracker's memory" will be recored as "process.vmrss proc=TaskTracker" in OpenTSDB).
   
 
   In mrjob.conf, it specifies what Map-Reduce task processes should be monitored:
   The property format is:
-      [pid PID_PROCESS] [uid UID_PROCESS] nmapper NUMBER_OF_MAPPER_TASKS nreducer NUMBER_OF_REDUCER_TASKS
+	
+  	[pid PID_PROCESS] [uid UID_PROCESS] nmapper NUMBER_OF_MAPPER_TASKS nreducer NUMBER_OF_REDUCER_TASKS
+
   pid and uid have the same meaning as the above.
-  nmapper NUMBER_OF_MAPPER_TASKS: it specifies the maximum number of mapper tasks running in each node (a parameter of Hadoop MapReduce system)
-  nreducer NUMBER_OF_REDUCER_TASKS: it specifies the maximum number of reducer tasks running in each node (a parameter of Hadoop MapReduce system)
+
+  	nmapper NUMBER_OF_MAPPER_TASKS: it specifies the maximum number of mapper tasks running in each node (a parameter of Hadoop MapReduce system)
+	nreducer NUMBER_OF_REDUCER_TASKS: it specifies the maximum number of reducer tasks running in each node (a parameter of Hadoop MapReduce system)
 
 3 Install otus web front-end:
   Otus web front-end is built by using Django web framework.
@@ -98,7 +103,7 @@ Get otus running
   Configure otus web front-end, edit the file in otus/webui/media/lib/tsd/configuration.js
  	
 	OpenTSDBURL: the server address of OpenTSDB where otus can get data from 
-    	NumMapper: the number of mapper tasks
+	NumMapper: the number of mapper tasks
 	NumReducer: the number of reducer tasks
 	ServerList: a list of host names that are monitored by tcollector 
 
