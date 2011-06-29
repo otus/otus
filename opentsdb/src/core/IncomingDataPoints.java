@@ -88,7 +88,11 @@ final class IncomingDataPoints implements WritableDataPoints {
     this.values = new long[3];
   }
 
-  public void setSeries(final String metric, final Map<String, String> tags) {
+  /**
+   * Validates the given metric and tags.
+   * @throws IllegalArgumentException if any of the arguments aren't valid.
+   */
+  static void checkMetricAndTags(final String metric, final Map<String, String> tags) {
     if (tags.size() <= 0) {
       throw new IllegalArgumentException("Need at least one tags (metric="
           + metric + ", tags=" + tags + ')');
@@ -102,7 +106,15 @@ final class IncomingDataPoints implements WritableDataPoints {
       Tags.validateString("tag name", tag.getKey());
       Tags.validateString("tag name", tag.getValue());
     }
+  }
 
+  /**
+   * Returns a partially initialized row key for this metric and these tags.
+   * The only thing left to fill in is the base timestamp.
+   */
+  static byte[] rowKeyTemplate(final TSDB tsdb,
+                               final String metric,
+                               final Map<String, String> tags) {
     final short metric_width = tsdb.metrics.width();
     final short tag_name_width = tsdb.tag_names.width();
     final short tag_value_width = tsdb.tag_values.width();
@@ -111,44 +123,56 @@ final class IncomingDataPoints implements WritableDataPoints {
     int row_size = (metric_width + Const.TIMESTAMP_BYTES
                     + tag_name_width * num_tags
                     + tag_value_width * num_tags);
-    if (row == null || row.length != row_size) {
-      row = new byte[row_size];
-    }
-    size = 0;
+    final byte[] row = new byte[row_size];
 
     short pos = 0;
 
-    copyInRowKey(pos, (AUTO_METRIC ? tsdb.metrics.getOrCreateId(metric)
+    copyInRowKey(row, pos, (AUTO_METRIC ? tsdb.metrics.getOrCreateId(metric)
                        : tsdb.metrics.getId(metric)));
     pos += metric_width;
 
     pos += Const.TIMESTAMP_BYTES;
 
     for(final byte[] tag : Tags.resolveOrCreateAll(tsdb, tags)) {
-      copyInRowKey(pos, tag);
+      copyInRowKey(row, pos, tag);
       pos += tag.length;
     }
+    return row;
+  }
+
+  public void setSeries(final String metric, final Map<String, String> tags) {
+    checkMetricAndTags(metric, tags);
+    row = rowKeyTemplate(tsdb, metric, tags);
+    size = 0;
   }
 
   /**
    * Copies the specified byte array at the specified offset in the row key.
+   * @param row The row key into which to copy the bytes.
    * @param offset The offset in the row key to start writing at.
    * @param bytes The bytes to copy.
    */
-  private void copyInRowKey(final short offset, final byte[] bytes) {
+  private static void copyInRowKey(final byte[] row, final short offset, final byte[] bytes) {
     System.arraycopy(bytes, 0, row, offset, bytes.length);
   }
 
   /**
-   * Copies the specified integer at the specified offset in the row key.
-   * @param offset The offset in the row key to start writing at.
-   * @param n The value to copy.
+   * Updates the base time in the row key.
+   * @param timestamp The timestamp from which to derive the new base time.
+   * @return The updated base time.
    */
-  private void copyInRowKey(final short offset, final int n) {
-    row[offset + 0] = (byte) (n >>> 24);
-    row[offset + 1] = (byte) (n >>> 16);
-    row[offset + 2] = (byte) (n >>>  8);
-    row[offset + 3] = (byte) (n >>>  0);
+  private long updateBaseTime(final long timestamp) {
+    // We force the starting timestamp to be on a MAX_TIMESPAN boundary
+    // so that all TSDs create rows with the same base time.  Otherwise
+    // we'd need to coordinate TSDs to avoid creating rows that cover
+    // overlapping time periods.
+    final long base_time = timestamp - (timestamp % Const.MAX_TIMESPAN);
+    // Clone the row key since we're going to change it.  We must clone it
+    // because the HBase client may still hold a reference to it in its
+    // internal datastructures.
+    row = Arrays.copyOf(row, row.length);
+    Bytes.setInt(row, (int) base_time, tsdb.metrics.width());
+    return base_time;
   }
 
   /**
@@ -177,36 +201,21 @@ final class IncomingDataPoints implements WritableDataPoints {
     long base_time;
     if (size > 0) {
       base_time = baseTime();
-      final long last_ts = (base_time
-                            + (qualifiers[size - 1] >>> Const.FLAG_BITS));
+      final long last_ts = base_time + (delta(qualifiers[size - 1]));
       if (timestamp <= last_ts) {
         throw new IllegalArgumentException("New timestamp=" + timestamp
             + " is less than previous=" + last_ts
             + " when trying to add value=" + value + " to " + this);
       } else if (timestamp - base_time >= Const.MAX_TIMESPAN) {
         // Need to start a new row as we've exceeded Const.MAX_TIMESPAN.
-        // We force the starting timestamp to be on a MAX_TIMESPAN boundary
-        // so that all TSDs create rows with the same base time.  Otherwise
-        // we'd need to coordinate TSDs to avoid creating rows that cover
-        // overlapping time periods.
-        base_time = timestamp - (timestamp % Const.MAX_TIMESPAN);
-        // Clone the row key since we're going to change it.  We must clone it
-        // because the HBase client may still hold a reference to it in its
-        // internal datastructures.
-        row = Arrays.copyOf(row, row.length);
-        copyInRowKey(tsdb.metrics.width(), (int) base_time);
+        base_time = updateBaseTime(timestamp);
         size = 0;
         //LOG.info("Starting a new row @ " + this);
       }
     } else {
       // This is the first data point, let's record the starting timestamp.
-      // See comment above regarding overlapping rows to understand the modulo.
-      base_time = timestamp - (timestamp % Const.MAX_TIMESPAN);
-      // Clone the row key since we're going to change it.  We must clone it
-      // because the HBase client may still hold a reference to it in its
-      // internal datastructures.
-      row = Arrays.copyOf(row, row.length);
-      copyInRowKey(tsdb.metrics.width(), (int) base_time);
+      base_time = updateBaseTime(timestamp);
+      Bytes.setInt(row, (int) base_time, tsdb.metrics.width());
     }
 
     if (values.length == size) {
@@ -223,19 +232,28 @@ final class IncomingDataPoints implements WritableDataPoints {
     final PutRequest point = new PutRequest(tsdb.table, row, TSDB.FAMILY,
                                             Bytes.fromShort(qualifier),
                                             Bytes.fromLong(value));
-    final long start_put = System.nanoTime();
-    final Callback<Object, Object> cb = new Callback<Object, Object>() {
-      public Object call(final Object arg) {
-        putlatency.add((int) ((System.nanoTime() - start_put) / 1000000));
-        return arg;
-      }
-      public String toString() {
-        return "time put request";
-      }
-    };
+    // TODO(tsuna): The following timing is rather useless.  First of all,
+    // the histogram never resets, so it tends to converge to a certain
+    // distribution and never changes.  What we really want is a moving
+    // histogram so we can see how the latency distribution varies over time.
+    // The other problem is that the Histogram class isn't thread-safe and
+    // here we access it from a callback that runs in an unknown thread, so
+    // we might miss some increments.  So let's comment this out until we
+    // have a proper thread-safe moving histogram.
+    //final long start_put = System.nanoTime();
+    //final Callback<Object, Object> cb = new Callback<Object, Object>() {
+    //  public Object call(final Object arg) {
+    //    putlatency.add((int) ((System.nanoTime() - start_put) / 1000000));
+    //    return arg;
+    //  }
+    //  public String toString() {
+    //    return "time put request";
+    //  }
+    //};
+
     // TODO(tsuna): Add an errback to handle some error cases here.
     point.setDurable(!batch_import);
-    return tsdb.client.put(point).addBoth(cb);
+    return tsdb.client.put(point)/*.addBoth(cb)*/;
   }
 
   private void grow() {
@@ -337,9 +355,13 @@ final class IncomingDataPoints implements WritableDataPoints {
     }
   }
 
+  private static short delta(final short qualifier) {
+    return (short) ((qualifier & 0xFFFF) >>> Const.FLAG_BITS);
+  }
+
   public long timestamp(final int i) {
     checkIndex(i);
-    return baseTime() + ((qualifiers[i] >>> Const.FLAG_BITS) & 0xFFFF);
+    return baseTime() + (delta(qualifiers[i]) & 0xFFFF);
   }
 
   public boolean isInteger(final int i) {
@@ -381,7 +403,7 @@ final class IncomingDataPoints implements WritableDataPoints {
        .append(base_time > 0 ? new Date(base_time * 1000) : "no date")
        .append("), [");
     for (short i = 0; i < size; i++) {
-      buf.append('+').append(qualifiers[i] >>> Const.FLAG_BITS);
+      buf.append('+').append(delta(qualifiers[i]));
       if (isInteger(i)) {
         buf.append(":long(").append(longValue(i));
       } else {

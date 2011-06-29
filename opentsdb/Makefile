@@ -30,6 +30,7 @@ tsdb_JAVA = \
 	src/core/DataPoints.java	\
 	src/core/DataPointsIterator.java	\
 	src/core/IncomingDataPoints.java	\
+	src/core/IllegalDataException.java	\
 	src/core/Query.java	\
 	src/core/RowKey.java	\
 	src/core/RowSeq.java	\
@@ -49,6 +50,7 @@ tsdb_JAVA = \
 	src/tools/CliQuery.java	\
 	src/tools/Core.java	\
 	src/tools/DumpSeries.java	\
+	src/tools/Fsck.java	\
 	src/tools/TSDMain.java	\
 	src/tools/TextImporter.java	\
 	src/tools/UidManager.java	\
@@ -84,6 +86,7 @@ tsdb_LIBADD = \
 test_JAVA = \
 	src/core/TestTags.java	\
 	src/stats/TestHistogram.java	\
+	src/tsd/TestGraphHandler.java	\
 	src/uid/TestNoSuchUniqueId.java	\
 	src/uid/TestUniqueId.java	\
 
@@ -174,6 +177,7 @@ $(top_builddir)/.staticroot-stamp: $(dist_pkgdata_DATA) $(top_builddir)/.gwtc-st
 	find -L $(DEV_TSD_STATICROOT) -type l -delete
 	p=`pwd`/$(top_builddir)/gwt/queryui && cd $(DEV_TSD_STATICROOT) \
 	  && for i in $$p/*; do ln -s -f "$$i" || break; done
+	find -L $(DEV_TSD_STATICROOT)/gwt -type f | xargs touch
 	@touch $(top_builddir)/.staticroot-stamp
 
 get_runtime_dep_classpath = `echo $(test_LIBADD) | tr ' ' ':'`

@@ -1,0 +1,126 @@
+diff --git a/src/tsd/GraphHandler.java b/src/tsd/GraphHandler.java
+index d1d1df0..9f0c581 100644
+--- a/src/tsd/GraphHandler.java
++++ b/src/tsd/GraphHandler.java
+@@ -192,7 +192,11 @@ final class GraphHandler implements HttpRpc {
+     tsdbqueries = null;  // free()
+ 
+     if (query.hasQueryStringParam("ascii")) {
+-      respondAsciiQuery(query, max_age, basepath, plot);
++      if (query.hasQueryStringParam("injson")) {
++    	  respondAsciiQueryInJson(query, max_age, basepath, plot);    	  
++      } else {
++    	  respondAsciiQuery(query, max_age, basepath, plot);
++      }
+       return;
+     }
+ 
+@@ -778,6 +782,108 @@ final class GraphHandler implements HttpRpc {
+   }
+ 
+   /**
++   * Respond to a query that wants the output in ASCII.
++   * <p>
++   * When a query specifies the "ascii" query string parameter, we send the
++   * data points back to the client in plain text instead of sending a PNG.
++   * @param query The query we're currently serving.
++   * @param max_age The maximum time (in seconds) we wanna allow clients to
++   * cache the result in case of a cache hit.
++   * @param basepath The base path used for the Gnuplot files.
++   * @param plot The plot object to generate Gnuplot's input files.
++   */
++  private static void respondAsciiQueryInJson(final HttpQuery query,
++                                        final int max_age,
++                                        final String basepath,
++                                        final Plot plot) {
++    final String path = basepath + ".json";
++    PrintWriter asciifile;
++    try {
++      asciifile = new PrintWriter(path);
++    } catch (IOException e) {
++      query.internalError(e);
++      return;
++    }
++    try {
++      String callback = query.getQueryStringParam("callback");
++      if (callback != null) {
++        asciifile.print(callback);
++        asciifile.print('(');
++      }
++      String view = query.getQueryStringParam("view");
++      if (view != null) {
++        asciifile.print("{\"view\":"+query+",");
++      } else {
++        asciifile.print("{");
++      }
++      final StringBuilder tagbuf = new StringBuilder();
++      asciifile.print("\"data\":[");
++      boolean firstDataPoints = true;
++      for (final DataPoints dp : plot.getDataPoints()) {
++    	if (!firstDataPoints) {
++    		asciifile.print(',');
++    	} else {
++    		firstDataPoints = false;
++    	}
++        final String metric = dp.metricName();
++        tagbuf.setLength(0);
++        tagbuf.append('{');
++        boolean firstTag = true;
++        for (final Map.Entry<String, String> tag : dp.getTags().entrySet()) {
++          if (!firstTag) {
++        	  tagbuf.append(',');
++          } else {
++        	  firstTag = false;
++          }
++          tagbuf.append('\"').append(tag.getKey())
++            .append("\":\"").append(tag.getValue()).append("\"");
++        }
++        tagbuf.append('}');
++        asciifile.print("{\"metric\":\"");
++        asciifile.print(metric);
++        asciifile.print("\",\n\"tags\":");
++        asciifile.print(tagbuf);
++        asciifile.print(",\n\"data\":[");
++        boolean firstDataPoint = true;
++        for (final DataPoint d : dp) {
++          if (!firstDataPoint) {
++        	asciifile.print(',');
++          } else {
++        	firstDataPoint = false;
++          }
++          asciifile.print('[');
++          asciifile.print(d.timestamp());
++          asciifile.print(',');
++          if (d.isInteger()) {
++            asciifile.print(d.longValue());
++          } else {
++            final double value = d.doubleValue();
++            if (value != value || Double.isInfinite(value)) {
++              throw new IllegalStateException("NaN or Infinity:" + value
++                + " d=" + d + ", query=" + query);
++            }
++            asciifile.print(value);
++          }
++          asciifile.print(']');          
++        }
++        asciifile.println("]}");
++      }
++      asciifile.print("]}");
++      if (callback != null) {
++        asciifile.print(')');
++      }
++    } finally {
++      asciifile.close();
++    }
++    try {
++      query.sendFile(path, max_age);
++    } catch (IOException e) {
++      query.internalError(e);
++    }
++  }
++  
++
++  /**
+    * Parses the {@code /q} query in a list of {@link Query} objects.
+    * @param tsdb The TSDB to use.
+    * @param query The HTTP query for {@code /q}.

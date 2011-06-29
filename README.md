@@ -39,6 +39,8 @@ Download from original source:
 	# From http://opentsdb.net/getting-started.html
 	git clone git://github.com/stumbleupon/opentsdb.git
 	cd opentsdb
+	# Apply patch in otus/patch/opentsdb.patch
+	patch -p0 < otus/patch/opentsdb.patch
 	make || make MD5=md5sum
 	make staticroot
 	cp ../asynchbase/build/hbaseasync-1.0.jar ./third_party/hbase/hbaseasync-1.0.jar
@@ -46,10 +48,9 @@ Download from original source:
 	./src/tsdb mkmetric http.hits sockets.simultaneous lolcats.viewed
 	./src/tsdb tsd --port=4242 --staticroot=build/staticroot --cachedir=/tmp/tsd
 
-4 Download patch for Otus
-
-
 5 Create new metrics for Otus in OpenTSDB:
+	#the script is in git://github.com/otus/script
+	python ./createmet.py
 
 Use the version in Otus trunk:
 	
