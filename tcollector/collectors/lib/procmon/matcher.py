@@ -1,4 +1,5 @@
 import re
+#import json
 import socket
 import sys
 from constant import *
@@ -47,6 +48,21 @@ class SubtreeMatcher:
     except:
       sys.stderr.write("Parse rule configuration failed.")
       self.rules = []
+
+  '''
+  def parseRules(self, conf):
+    raw_rules = loads(conf)
+    self.rules = []
+    try:
+      for rule in raw_rules:
+        nrule = [0, 0, '', False, '', 0]
+        for key in rule.keys():
+          nrule[self.RULEKEYTOID[key]] = rule[key]
+        self.rules.append(nrule)
+    except:
+      sys.stderr.write("Parse rule configuration failed.")
+      self.rules = []
+  '''
 
   def initMetric(self, modules):
     self.results = []
@@ -149,9 +165,9 @@ class MRManager:
     for j in range(len(self.updateList)):
       if mark[j]:
         if self.nactive < len(self.tasks):
-          self.tasks[self.nactive] = updateList[j]
+          self.tasks[self.nactive] = self.updateList[j]
         else:
-          self.tasks.append(updateList[j])
+          self.tasks.append(self.updateList[j])
         self.nactive += 1
 
   def report(self, modules, timestamp, reporter):
@@ -170,6 +186,8 @@ class MRManager:
             reporter.report(name, timestamp, value, types)
 
 class MapReduceMatcher(SubtreeMatcher):
+  #rule definition:
+  #pid, uid, cmdline, agg_sub_tree, nameschema
   RULE_LEN = 5
   RULE_IND_PID = 0
   RULE_IND_UID = 1
@@ -194,6 +212,7 @@ class MapReduceMatcher(SubtreeMatcher):
 
   def parseRules(self, conf):
     self.rules = []
+#    try:
     for l in conf:
       nrule = [0, 0, '', False, '', 0, 0, 0]
       items = l.split()
@@ -208,6 +227,9 @@ class MapReduceMatcher(SubtreeMatcher):
           nrule[id] = items[i+1]
         i = i + 2
       self.rules.append(nrule)
+#    except:
+#      sys.stderr.write("Parse rule configuration failed.")
+#      self.rules = []
 
   def initMetric(self, modules):
     self.results = []
@@ -298,3 +320,77 @@ class SumMatcher:
         name = "node.%s"%(module.naming()[j])
         names.append(name)
     return names
+
+def test1():
+  PATH.PROCPID_CMDLINE='./test/proc/%d/cmdline'
+  PATH.PROCPID_STATUS='./test/proc/%d/status'
+  PATH.PROCPID_STAT='./test/proc/%d/stat'
+  PATH.PROCPID_IO='./test/proc/%d/io'
+
+  f = open("./test/conf1.txt", "r")
+  lines = f.readlines()
+  f.close()
+  conf = ''
+  for line in lines:
+    conf += line
+  matcher = SubtreeMatcher(conf)
+  modules = [ProcInfoStat(), ProcInfoStatus(), ProcInfoIO()]
+  summat  = SumMatcher()
+  matcher.initMetric(modules)
+  summat.initMetric(modules)
+  print matcher.listMetricName()
+  print summat.listMetricName()
+
+  plist = {}
+  proc = ProcInfo(1, plist, modules)
+  plist[1] = proc
+  proc.update(0)
+  matcher.startGroup()
+  matcher.check(proc)
+  stdoutr = StdoutReporter()
+  matcher.report(2, stdoutr)
+
+  proc.update(5)
+  matcher.startGroup()
+  matcher.check(proc)
+  matcher.report(2, stdoutr)
+
+def test2():
+  f = open("./test.txt", "r")
+  conf = f.readlines()
+  f.close()
+  matcher = SubtreeMatcher(conf, "localhost")
+  modules = [ProcInfoStat(), ProcInfoStatus(), ProcInfoIO()]
+  matcher.initMetric(modules)
+  plist = {}
+  pid = 1856
+  proc = ProcInfo(pid, plist, modules)
+  plist[pid] = proc
+  proc.update(0)
+  matcher.startGroup()
+  matcher.check(proc)
+  stdoutr = StdoutReporter()
+  matcher.report(2, stdoutr)
+
+def test3():
+  f = open("./mrtask.conf", "r")
+  conf = f.readlines()
+  f.close()
+  matcher = MapReduceMatcher(conf, "localhost")
+  modules = [ProcInfoStat(), ProcInfoStatus(), ProcInfoIO()]
+  matcher.initMetric(modules)
+  plist = ProcMon()
+  pid = 30538 
+  proc = ProcInfo(pid, plist, modules)
+  plist.procs[pid] = proc
+  proc.update(0)
+  proc.prepare_tree()
+  #proc.cmd = "4j12-1.4.3.jar:/usr/local/sw/hadoop/build/ivy/lib/Hadoop/common/commons-el-1.0.jar:/usr/local/sw/hadoop/build/ivy/lib/Hadoop/common/core-3.1.1.jar:/usr/local/sw/hadoop/build/ivy/lib/Hadoop/common/servlet-api-2.5-6.1.14.jar:/usr/local/sw/hadoop/build/ivy/lib/Hadoop/common/jetty-6.1.14.jar:/usr/local/sw/hadoop/build/ivy/lib/Hadoop/common/log4j-1.2.15.jar:/usr/local/sw/hadoop/build/ivy/lib/Hadoop/common/slf4j-api-1.4.3.jar:/usr/local/sw/hadoop/build/ivy/lib/Hadoop/common/xmlenc-0.52.jar:/usr/local/sw/hadoop/build/ivy/lib/Hadoop/common/jets3t-0.6.1.jar:/usr/local/sw/hadoop/build/ivy/lib/Hadoop/common/commons-cli-1.2.jar:/usr/local/sw/hadoop/build/ivy/lib/Hadoop/common/commons-httpclient-3.0.1.jar:/usr/local/sw/hadoop/build/ivy/lib/Hadoop/common/jasper-runtime-5.5.12.jar:/usr/local/sw/hadoop/build/ivy/lib/Hadoop/common/jetty-util-6.1.14.jar:/usr/local/sw/hadoop/build/ivy/lib/Hadoop/common/junit-3.8.1.jar::/l/b2/scratch/hadoop-data/global/mapred/local/taskTracker/jobcache/job_201106031747_0066/jars/classes:/l/b2/scratch/hadoop-data/global/mapred/local/taskTracker/jobcache/job_201106031747_0066/jars:/l/d2/scratch/hadoop-data/global/mapred/local/taskTracker/jobcache/job_201106031747_0066/attempt_201106031747_0066_r_000000_1/work -Dhadoop.log.dir=/l/a2/scratch/hadoop-data/global/log -Dhadoop.root.logger=INFO,TLA -Dhadoop.tasklog.taskid=attempt_201106031747_0066_r_000000_1 -Dhadoop.tasklog.totalLogFileSize=0 org.apache.hadoop.mapred.Child 127.0.0.1 44373 attempt_201106031747_0066_r_000000_1 -1985077290"
+  matcher.startGroup()
+  matcher.check(proc)
+  matcher.endGroup()
+  stdoutr = StdoutReporter()
+  matcher.report(2, stdoutr)
+
+if __name__ == '__main__':
+  test3()
