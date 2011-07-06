@@ -40,7 +40,7 @@ Download from original source:
 	git clone git://github.com/stumbleupon/opentsdb.git
 	cd opentsdb
 	# Apply patch in otus/patch/opentsdb.patch
-	patch -p0 < otus/patch/opentsdb.patch
+	patch -p1 < otus/patch/opentsdb.patch
 	make || make MD5=md5sum
 	make staticroot
 	cp ../asynchbase/build/hbaseasync-1.0.jar ./third_party/hbase/hbaseasync-1.0.jar
