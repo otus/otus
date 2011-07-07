@@ -3,7 +3,7 @@
 # Semi Universal start-stop script
 
 TSD_HOST=localhost
-TCOLLECTOR_PATH=${TCOLLECTOR_PATH-'/home/kair/Code/tcollector'}
+TCOLLECTOR_PATH=${TCOLLECTOR_PATH-'./'}
 test -n "$TSD_HOST" || {
     echo >&2 "TSD_HOST is not set in $0"
     exit 1
