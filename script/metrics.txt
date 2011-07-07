@@ -34,3 +34,220 @@ node.canwritebytes
 node.readbytesrate
 node.writebytesrate
 node.canwritebytesrate
+df.1kblocks.total 1309472128 144183992 mount=/ fstype=ext4
+df.1kblocks.used 1309472128 51140488 mount=/ fstype=ext4
+df.1kblocks.free 1309472128 85719344 mount=/ fstype=ext4
+df.1kblocks.total 1309472128 1995008 mount=/var/run fstype=tmpfs
+df.1kblocks.used 1309472128 108 mount=/var/run fstype=tmpfs
+df.1kblocks.free 1309472128 1994900 mount=/var/run fstype=tmpfs
+df.1kblocks.total 1309472128 1995008 mount=/var/lock fstype=tmpfs
+df.1kblocks.used 1309472128 0 mount=/var/lock fstype=tmpfs
+df.1kblocks.free 1309472128 1995008 mount=/var/lock fstype=tmpfs
+df.1kblocks.total 1309472128 53251424 mount=/media/DEBEFB27BEFAF6BD fstype=fuseblk
+df.1kblocks.used 1309472128 4072504 mount=/media/DEBEFB27BEFAF6BD fstype=fuseblk
+df.1kblocks.free 1309472128 49178920 mount=/media/DEBEFB27BEFAF6BD fstype=fuseblk
+df.inodes.total 1309472128 9158656 mount=/ fstype=ext4
+df.inodes.used 1309472128 551893 mount=/ fstype=ext4
+df.inodes.free 1309472128 8606763 mount=/ fstype=ext4
+df.inodes.total 1309472128 207944 mount=/dev fstype=devtmpfs
+df.inodes.used 1309472128 810 mount=/dev fstype=devtmpfs
+df.inodes.free 1309472128 207134 mount=/dev fstype=devtmpfs
+df.inodes.total 1309472128 210047 mount=/dev/shm fstype=tmpfs
+df.inodes.used 1309472128 11 mount=/dev/shm fstype=tmpfs
+df.inodes.free 1309472128 210036 mount=/dev/shm fstype=tmpfs
+df.inodes.total 1309472128 210047 mount=/var/run fstype=tmpfs
+df.inodes.used 1309472128 66 mount=/var/run fstype=tmpfs
+df.inodes.free 1309472128 209981 mount=/var/run fstype=tmpfs
+df.inodes.total 1309472128 210047 mount=/var/lock fstype=tmpfs
+df.inodes.used 1309472128 2 mount=/var/lock fstype=tmpfs
+df.inodes.free 1309472128 210045 mount=/var/lock fstype=tmpfs
+df.inodes.total 1309472128 210047 mount=/lib/init/rw fstype=tmpfs
+df.inodes.used 1309472128 1 mount=/lib/init/rw fstype=tmpfs
+df.inodes.free 1309472128 210046 mount=/lib/init/rw fstype=tmpfs
+df.inodes.total 1309472128 49309992 mount=/media/DEBEFB27BEFAF6BD fstype=fuseblk
+df.inodes.used 1309472128 98255 mount=/media/DEBEFB27BEFAF6BD fstype=fuseblk
+df.inodes.free 1309472128 49211737 mount=/media/DEBEFB27BEFAF6BD fstype=fuseblk
+proc.net.bytes 1309472128 1416675250 iface=eth0 direction=in
+proc.net.bytes 1309472128 4212756680 iface=eth0 direction=out
+proc.net.packets 1309472128 34992077 iface=eth0 direction=in
+proc.net.packets 1309472128 9319802 iface=eth0 direction=out
+proc.net.errs 1309472128 0 iface=eth0 direction=in
+proc.net.errs 1309472128 0 iface=eth0 direction=out
+proc.net.dropped 1309472128 0 iface=eth0 direction=in
+proc.net.dropped 1309472128 0 iface=eth0 direction=out
+net.sockstat.num_sockets 1309472128 49 type=tcp
+net.sockstat.num_timewait 1309472128 6
+net.sockstat.sockets_inuse 1309472128 43 type=tcp
+net.sockstat.sockets_inuse 1309472128 4 type=udp
+net.sockstat.sockets_inuse 1309472128 0 type=udplite
+net.sockstat.sockets_inuse 1309472128 0 type=raw
+net.sockstat.num_orphans 1309472128 0
+net.sockstat.memory 1309472128 8192 type=tcp
+net.sockstat.memory 1309472128 8192 type=udp
+net.sockstat.memory 1309472128 0 type=ipfrag
+net.sockstat.ipfragqueues 1309472128 0
+net.stat.tcp.invalid_sack 1309472128 419 type=olddup
+net.stat.tcp.delayedack 1309472128 131957 type=sent
+net.stat.tcp.failed_accept 1309472128 0 reason=other
+net.stat.tcp.abort 1309472128 0 type=out_of_memory
+net.stat.tcp.abort 1309472128 940 type=data_after_fin_wait1
+net.stat.tcp.syncookies 1309472128 0 type=received
+net.stat.tcp.packetloss.recovery 1309472128 574 type=sack
+net.stat.tcp.syncookies 1309472128 42 type=failed
+net.stat.tcp.abort 1309472128 0 type=unexpected_syn
+net.stat.tcp.congestion.recovery 1309472128 8 type=sack
+net.stat.tcp.invalid_sack 1309472128 0 type=invalid
+net.stat.tcp.delayedack 1309472128 8362 type=lost
+net.stat.tcp.reording 1309472128 11 detectedby=sack
+net.stat.tcp.memory.pressure 1309472128 0
+net.stat.tcp.congestion.recovery 1309472128 31 type=full_undo
+net.stat.tcp.memory.prune 1309472128 0 type=drop_received
+net.stat.tcp.invalid_sack 1309472128 970 type=retransmit
+net.stat.tcp.reording 1309472128 0 detectedby=fast_retransmit
+net.stat.tcp.delayedack 1309472128 3 type=locked
+net.stat.tcp.congestion.recovery 1309472128 1274 type=hoe_heuristic
+net.stat.tcp.reording 1309472128 12 detectedby=fack
+net.stat.tcp.abort 1309472128 0 type=linger
+net.stat.tcp.congestion.recovery 1309472128 867 type=ack
+net.stat.tcp.abort 1309472128 438 type=timeout
+net.stat.tcp.memory.prune 1309472128 0 type=drop_ofo_queue
+net.stat.tcp.syncookies 1309472128 0 type=sent
+net.stat.tcp.failed_accept 1309472128 0 reason=full_acceptq
+net.stat.tcp.abort 1309472128 1936 type=data_after_close
+net.stat.tcp.reording 1309472128 38 detectedby=timestamp
+net.stat.tcp.abort.failed 1309472128 0
+net.stat.tcp.packetloss.recovery 1309472128 0 type=fast_retransmit
+iostat.disk.read_requests 1309472128 299356 dev=sda
+iostat.disk.read_merged 1309472128 314274 dev=sda
+iostat.disk.read_sectors 1309472128 10465520 dev=sda
+iostat.disk.msec_read 1309472128 2171916 dev=sda
+iostat.disk.write_requests 1309472128 2118943 dev=sda
+iostat.disk.write_merged 1309472128 22054773 dev=sda
+iostat.disk.write_sectors 1309472128 192363368 dev=sda
+iostat.disk.msec_write 1309472128 219551208 dev=sda
+iostat.disk.ios_in_progress 1309472128 0 dev=sda
+iostat.disk.msec_total 1309472128 10986368 dev=sda
+iostat.disk.msec_weighted_total 1309472128 223604768 dev=sda
+iostat.part.read_requests 1309472128 56 dev=sda1
+iostat.part.read_merged 1309472128 0 dev=sda1
+iostat.part.read_sectors 1309472128 448 dev=sda1
+iostat.part.msec_read 1309472128 324 dev=sda1
+iostat.part.write_requests 1309472128 0 dev=sda1
+iostat.part.write_merged 1309472128 0 dev=sda1
+iostat.part.write_sectors 1309472128 0 dev=sda1
+iostat.part.msec_write 1309472128 0 dev=sda1
+iostat.part.ios_in_progress 1309472128 0 dev=sda1
+iostat.part.msec_total 1309472128 324 dev=sda1
+iostat.part.msec_weighted_total 1309472128 324 dev=sda1
+iostat.part.read_requests 1309472128 30001 dev=sda2
+iostat.part.read_merged 1309472128 190373 dev=sda2
+iostat.part.read_sectors 1309472128 1731730 dev=sda2
+iostat.part.msec_read 1309472128 308324 dev=sda2
+iostat.part.write_requests 1309472128 41961 dev=sda2
+iostat.part.write_merged 1309472128 646079 dev=sda2
+iostat.part.write_sectors 1309472128 5504448 dev=sda2
+iostat.part.msec_write 1309472128 16408800 dev=sda2
+iostat.part.ios_in_progress 1309472128 0 dev=sda2
+iostat.part.msec_total 1309472128 298008 dev=sda2
+iostat.part.msec_weighted_total 1309472128 16723136 dev=sda2
+iostat.part.read_requests 1309472128 2 dev=sda3
+iostat.part.read_merged 1309472128 0 dev=sda3
+iostat.part.read_sectors 1309472128 4 dev=sda3
+iostat.part.msec_read 1309472128 136 dev=sda3
+iostat.part.write_requests 1309472128 0 dev=sda3
+iostat.part.write_merged 1309472128 0 dev=sda3
+iostat.part.write_sectors 1309472128 0 dev=sda3
+iostat.part.msec_write 1309472128 0 dev=sda3
+iostat.part.ios_in_progress 1309472128 0 dev=sda3
+iostat.part.msec_total 1309472128 136 dev=sda3
+iostat.part.msec_weighted_total 1309472128 136 dev=sda3
+iostat.part.read_requests 1309472128 269188 dev=sda5
+iostat.part.read_merged 1309472128 123837 dev=sda5
+iostat.part.read_sectors 1309472128 8731954 dev=sda5
+iostat.part.msec_read 1309472128 1862636 dev=sda5
+iostat.part.write_requests 1309472128 1934002 dev=sda5
+iostat.part.write_merged 1309472128 21407820 dev=sda5
+iostat.part.write_sectors 1309472128 186851640 dev=sda5
+iostat.part.msec_write 1309472128 200484092 dev=sda5
+iostat.part.ios_in_progress 1309472128 0 dev=sda5
+iostat.part.msec_total 1309472128 8463124 dev=sda5
+iostat.part.msec_weighted_total 1309472128 204222368 dev=sda5
+iostat.part.read_requests 1309472128 58 dev=sda6
+iostat.part.read_merged 1309472128 64 dev=sda6
+iostat.part.read_sectors 1309472128 976 dev=sda6
+iostat.part.msec_read 1309472128 248 dev=sda6
+iostat.part.write_requests 1309472128 36 dev=sda6
+iostat.part.write_merged 1309472128 874 dev=sda6
+iostat.part.write_sectors 1309472128 7280 dev=sda6
+iostat.part.msec_write 1309472128 3936 dev=sda6
+iostat.part.ios_in_progress 1309472128 0 dev=sda6
+iostat.part.msec_total 1309472128 3324 dev=sda6
+iostat.part.msec_weighted_total 1309472128 4184 dev=sda6
+proc.uptime.total 1309472128 788253.20
+proc.uptime.now 1309472128 3113369.76
+proc.meminfo.memtotal 1309472128 3990016
+proc.meminfo.memfree 1309472128 403684
+proc.meminfo.buffers 1309472128 342824
+proc.meminfo.cached 1309472128 2327384
+proc.meminfo.swapcached 1309472128 228
+proc.meminfo.active 1309472128 1436488
+proc.meminfo.inactive 1309472128 1950688
+proc.meminfo.unevictable 1309472128 32
+proc.meminfo.mlocked 1309472128 32
+proc.meminfo.hightotal 1309472128 3149828
+proc.meminfo.highfree 1309472128 243328
+proc.meminfo.lowtotal 1309472128 840188
+proc.meminfo.lowfree 1309472128 160356
+proc.meminfo.swaptotal 1309472128 9797624
+proc.meminfo.swapfree 1309472128 9793984
+proc.meminfo.dirty 1309472128 216
+proc.meminfo.writeback 1309472128 0
+proc.meminfo.anonpages 1309472128 716604
+proc.meminfo.mapped 1309472128 136096
+proc.meminfo.shmem 1309472128 29012
+proc.meminfo.slab 1309472128 135132
+proc.meminfo.sreclaimable 1309472128 119552
+proc.meminfo.sunreclaim 1309472128 15580
+proc.meminfo.kernelstack 1309472128 3136
+proc.meminfo.pagetables 1309472128 10264
+proc.meminfo.nfs_unstable 1309472128 0
+proc.meminfo.bounce 1309472128 0
+proc.meminfo.writebacktmp 1309472128 0
+proc.meminfo.commitlimit 1309472128 11792632
+proc.meminfo.committed_as 1309472128 2523712
+proc.meminfo.vmalloctotal 1309472128 122880
+proc.meminfo.vmallocused 1309472128 42260
+proc.meminfo.vmallocchunk 1309472128 75300
+proc.meminfo.hardwarecorrupted 1309472128 0
+proc.meminfo.hugepages_total 1309472128 0
+proc.meminfo.hugepages_free 1309472128 0
+proc.meminfo.hugepages_rsvd 1309472128 0
+proc.meminfo.hugepages_surp 1309472128 0
+proc.meminfo.hugepagesize 1309472128 2048
+proc.meminfo.directmap4k 1309472128 8184
+proc.meminfo.directmap2m 1309472128 903168
+proc.vmstat.pgpgin 1309472128 5235960
+proc.vmstat.pgpgout 1309472128 96181684
+proc.vmstat.pswpin 1309472128 40
+proc.vmstat.pswpout 1309472128 910
+proc.vmstat.pgfault 1309472128 1729906897
+proc.vmstat.pgmajfault 1309472128 205840
+proc.stat.cpu 1309472128 3850864 type=user
+proc.stat.cpu 1309472128 51324 type=nice
+proc.stat.cpu 1309472128 1607295 type=system
+proc.stat.cpu 1309472128 311336976 type=idle
+proc.stat.cpu 1309472128 822781 type=iowait
+proc.stat.cpu 1309472128 14 type=irq
+proc.stat.cpu 1309472128 13862 type=softirq
+proc.stat.cpu 1309472128 0 type=guest
+proc.stat.cpu 1309472128 0 type=guest_nice
+proc.stat.intr 1309472128 443416094
+proc.stat.ctxt 1309472128 1525109846
+proc.stat.processes 1309472128 303645
+proc.stat.procs_blocked 1309472128 0
+proc.loadavg.1min 1309472128 1.23
+proc.loadavg.5min 1309472128 1.02
+proc.loadavg.15min 1309472128 0.98
+proc.loadavg.runnable 1309472128 1
+proc.loadavg.total_threads 1309472128 390
+proc.kernel.entropy_avail 1309472128 135
