@@ -12,10 +12,12 @@ import netstat
 import iostat
 import procstats
 
-def init(min_interval, plugins):
+def init(plugins):
+    min_interval = 1000
     for plugin in plugins:
         if plugin[1] < min_interval:
            min_interval = plugin[1]
+    return min_interval
 
 def main():
     plugins = [
@@ -25,8 +27,7 @@ def main():
         [0, iostat.COLLECTION_INTERVAL, iostat.main],
         [0, procstats.COLLECTION_INTERVAL, procstats.main]
     ]
-    min_interval = 1000
-    init(min_interval, plugins)
+    min_interval = init(plugins)
 
     for plugin in plugins:
         plugin[2]()
