@@ -219,6 +219,7 @@ function unitFormatter(format, val) {
 function renderView(startTime, endTime, genViewFun, conf, plotdiv) {
 	var ret = genViewFun(startTime, endTime, conf);
 	try {
+		alert(ret.uri);
 		$.getJSON(ret.uri, function(response) {
 			try {
 				var datalist = new Array();
