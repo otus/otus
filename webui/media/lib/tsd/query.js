@@ -219,9 +219,11 @@ function unitFormatter(format, val) {
 function renderView(startTime, endTime, genViewFun, conf, plotdiv) {
 	var ret = genViewFun(startTime, endTime, conf);
 	try {
-		alert(ret.uri);
 		$.getJSON(ret.uri, function(response) {
 			try {
+			        startTime = startTime.replace('-',' ').replace('/','-').replace('/','-')
+				endTime = endTime.replace('-',' ').replace('/','-').replace('/','-')
+
 				var datalist = new Array();
 				for (var i = 0; i < response['data'].length; ++i) {
 					datalist.push(response['data'][i]['data']);
