@@ -89,7 +89,7 @@ index d1d1df0..9f0c581 100644
 +        	firstDataPoint = false;
 +          }
 +          asciifile.print('[');
-+          asciifile.print(d.timestamp());
++          asciifile.print(d.timestamp() * 1000);
 +          asciifile.print(',');
 +          if (d.isInteger()) {
 +            asciifile.print(d.longValue());
