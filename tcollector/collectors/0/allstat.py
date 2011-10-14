@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """import various /proc stats from /proc into TSDB"""
 
 import os 

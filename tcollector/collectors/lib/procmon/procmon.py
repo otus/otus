@@ -14,7 +14,7 @@ class ProcInfo:
     self.plist = plist
     self.oldtime = 0
     self.modules = modules
-    self.met = MetricList(modules, -1)
+    self.met = MetricList(modules, 0)
     self.getIDs()
 
   def getIDs(self):

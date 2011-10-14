@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 import os, sys, getopt
 MAINPATH=os.path.dirname(os.path.abspath(__file__))+"/../"
 sys.path.append(MAINPATH+'lib/procmon')
