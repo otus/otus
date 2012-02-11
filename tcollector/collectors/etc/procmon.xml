@@ -1,0 +1,15 @@
+<configuratio>
+  <processes>
+<!-- List all the processes to monitor -->
+    <process>
+        <pid> 0 </pid>
+        <uid> 0  </uid>
+        <cmdline> .*org.apache.hadoop.hdfs.server.datanode.DataNode.* </cmdline>
+        <displayname> DataNode </displayname>
+    </process>
+    <process>
+        <cmdline> .*org.apache.hadoop.mapred.TaskTracker.* </cmdline>
+        <displayname> TaskTracker </displayname>
+    </process>
+  </processes>
+</configuration>
