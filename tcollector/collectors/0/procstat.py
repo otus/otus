@@ -1,49 +1,41 @@
 #!/usr/bin/env python
 import os, sys, getopt
 MAINPATH=os.path.dirname(os.path.abspath(__file__))+"/../"
-sys.path.append(MAINPATH+'lib/procmon')
+sys.path.append(MAINPATH+'lib/')
 import time
 import socket
-from constant import *
-from metriclist import *
-from procinfo import *
-from reporter import *
-from matcher import *
-from procmon import *
+from procmon import procmon
+from procmon import config
+from procmon import procinfo
+from procmon import reporter
+from procmon import matcher
+from procmon import config
 
 def main():
-  procmon = ProcMon()
-  modules = [ProcInfoStat(), ProcInfoStatus(), ProcInfoIO()]
+  procmonitor = procmon.ProcMon()
+  modules = [procinfo.ProcInfoStat(), procinfo.ProcInfoStatus(),
+             procinfo.ProcInfoIO()]
   for mod in modules:
-    procmon.register_module(mod)
-  reporters = [StdoutReporter()]
+    procmonitor.register_module(mod)
+  reporters = [reporter.StdoutReporter()]
   for rep in reporters:
-    procmon.register_reporter(rep)
+    procmonitor.register_reporter(rep)
 
   try:
     host = socket.gethostname()
   except:
     host = 'localhost'
 
-  try:
-    f = open(MAINPATH+"etc/procmon.conf", "r")
-    conf = f.readlines()
-    f.close()
-  except:
-    conf = []
-
-  try:
-    f = open(MAINPATH+"etc/mrtask.conf", "r")
-    mrconf = f.readlines()
-    f.close()
-  except:
-    mrconf = []
-
-  matchers = [SubtreeMatcher(conf, host), MapReduceMatcher(mrconf, host), SumMatcher(host)]
+  config_parser = config.ProcmonConfigParser()
+  procconf = config_parser.load_procmon_config(MAINPATH+'etc/procmon.xml')
+  mrconf = config_parser.load_mrtask_config(MAINPATH+'etc/mrtask.xml')
+  matchers = [matcher.SubtreeMatcher(procconf, host),
+              matcher.MapReduceMatcher(mrconf, host),
+              matcher.SumMatcher(host)]
   for mat in matchers:
-    procmon.register_matcher(mat)
-  procmon.initialize()
-  procmon.run(10)
+    procmonitor.register_matcher(mat)
+  procmonitor.initialize()
+  procmonitor.run(10)
 
 if __name__ == "__main__":
   main()

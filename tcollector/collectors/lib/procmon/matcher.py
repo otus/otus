@@ -8,6 +8,12 @@ from procinfo import *
 from procmon import *
 from reporter import *
 
+def safe_get(dictionary, key):
+    if key in dictionary:
+        return dictionary[key]
+    else:
+        return None
+
 class SubtreeMatcherRule:
     RULE_LEN      = 6
     RULE_IND_PID  = 0
@@ -26,22 +32,22 @@ class SubtreeMatcherRule:
         self._rule = [0, 0, '', False, '', 0]
 
     def set_rule(self, conf):
-        pid = conf['pid']
+        pid = safe_get(conf, 'pid')
         if pid is not None and pid.isdigit():
             self._rule[self.RULE_IND_PID] = int(pid)
-        uid = conf['uid']
+        uid = safe_get(conf, 'uid')
         if uid is not None and uid.isdigit():
             self._rule[self.RULE_IND_UID] = int(uid)
-        cmd = conf['cmd']
+        cmd = safe_get(conf, 'cmdline')
         if cmd is not None:
             self._rule[self.RULE_IND_CMD] = cmd
-        agg = conf['agg']
-        if agg is not None and (agg == 'True' or agg = 'False'):
+        agg = safe_get(conf, 'aggregated')
+        if agg is not None and (agg == 'True' or agg == 'False'):
             self._rule[self.RULE_IND_AGG] = bool(agg)
-        name = conf['name']
+        name = safe_get(conf, 'displayname')
         if name is not None:
             self._rule[self.RULE_IND_NAME] = name
-        nuid = conf['nuid']
+        nuid = safe_get(conf, 'nuid')
         if nuid is not None and nuid.isdigit():
             self._rule[self.RULE_IND_NUID] = int(nuid)
 
@@ -56,26 +62,30 @@ class SubtreeMatcherRule:
            self._rule[self.RULE_IND_NUID] == pinfo.uid:
             return False
         if self._rule[self.RULE_IND_CMD] != '' and \
-           not re.match(rule[self.RULE_IND_CMD], pinfo.cmd):
+           not re.match(self._rule[self.RULE_IND_CMD], pinfo.cmd):
             return False
         return True
 
     def is_aggregated(self):
         return self._rule[self.RULE_IND_AGG]
 
+    def get_displayname(self):
+        return self._rule[self.RULE_IND_NAME]
+
 class SubtreeMatcher:
-    def __init__(self, confs, _host):
-        self.parseRules(confs)
+    def __init__(self, config, _host):
+        if 'processes' in config:
+            self.parseRules(config['processes'])
         self.results = []
         self.modules = None
         self.host = _host
 
-    def parseRules(self, confs):
+    def parseRules(self, rules):
         self.rules = []
         try:
-            for conf in confs:
+            for rule_item in rules:
                 new_rule = SubtreeMatcherRule()
-                new_rule.set_rule(conf)
+                new_rule.set_rule(rule_item)
                 self.rules.append(new_rule)
         except:
             sys.stderr.write("Parse rule configuration failed.")
@@ -104,7 +114,7 @@ class SubtreeMatcher:
         for i in range(0, len(self.rules)):
             rule = self.rules[i]
             if rule.is_matched(pinfo):
-                if rule[self.RULE_IND_AGG]:
+                if rule.is_aggregated():
                     self.aggTree(pinfo, self.results[i])
                 else:
                     self.results[i].add(self.getMetric(pinfo))
@@ -115,7 +125,7 @@ class SubtreeMatcher:
                 module = self.modules[j]
                 for k in range(0, module.size()):
                     name = "process.%s" % (module.naming()[k])
-                    types = "proc=%s"%(self.rules[i][self.RULE_IND_NAME])
+                    types = "proc=%s"%(self.rules[i].get_displayname())
                     value = self.results[i].get(j, k)
                     reporter.report(name, timestamp, value, types)
 
@@ -219,27 +229,27 @@ class MapReduceMatcherRule:
         self._rule = [0, 0, '', False, '', 0, 0, 0]
 
     def set_rule(self, conf):
-        pid = conf['pid']
+        pid = safe_get(conf, 'pid')
         if pid is not None and pid.isdigit():
             self._rule[self.RULE_IND_PID] = int(pid)
-        uid = conf['uid']
+        uid = safe_get(conf, 'uid')
         if uid is not None and uid.isdigit():
             self._rule[self.RULE_IND_UID] = int(uid)
-        cmd = conf['cmd']
-        if cmd is not None:
-            self._rule[self.RULE_IND_CMD] = cmd
-        agg = conf['agg']
-        if agg is not None and (agg == 'True' or agg = 'False'):
+        agg = safe_get(conf, 'aggregated')
+        if agg is not None and (agg == 'True' or agg == 'False'):
             self._rule[self.RULE_IND_AGG] = bool(agg)
-        name = conf['name']
+        name = safe_get(conf, 'displayname')
         if name is not None:
             self._rule[self.RULE_IND_NAME] = name
-        nuid = conf['nuid']
+        nuid = safe_get(conf, 'nuid')
         if nuid is not None and nuid.isdigit():
             self._rule[self.RULE_IND_NUID] = int(nuid)
-        nuid = conf['nuid']
-        if nuid is not None and nuid.isdigit():
-            self._rule[self.RULE_IND_NUID] = int(nuid)
+        nmapper = safe_get(conf, 'nmapper')
+        if nmapper is not None and nmapper.isdigit():
+            self._rule[self.RULE_IND_NMAPPER] = int(nmapper)
+        nreducer = safe_get(conf, 'nreducer')
+        if nreducer is not None and nreducer.isdigit():
+            self._rule[self.RULE_IND_NREDUCER] = int(nreducer)
 
     def is_matched(self, pinfo):
         if self._rule[self.RULE_IND_PID] > 0 and \
@@ -252,12 +262,9 @@ class MapReduceMatcherRule:
            self._rule[self.RULE_IND_NUID] == pinfo.uid:
             return False
         if self._rule[self.RULE_IND_CMD] != '' and \
-           not re.match(rule[self.RULE_IND_CMD], pinfo.cmd):
+           not re.match(self._rule[self.RULE_IND_CMD], pinfo.cmd):
             return False
         return True
-
-    def is_aggregated(self):
-        return self._rule[self.RULE_IND_AGG]
 
     def get_num_mapper(self):
         return self._rule[self.RULE_IND_NMAPPER]
@@ -265,24 +272,29 @@ class MapReduceMatcherRule:
     def get_num_reducer(self):
         return self._rule[self.RULE_IND_NREDUCER]
 
+    def get_displayname(self):
+        return self._rule[self.RULE_IND_NAME]
 
 class MapReduceMatcher(SubtreeMatcher):
 
-    def __init__(self, confs, _host):
-        self.parseRules(confs)
+    def __init__(self, config, _host):
+        if 'mrtask' in config:
+            self.parseRules(config['mrtask'])
+        else:
+            self.rules = []
         self.managers = []
         for i in range(len(self.rules)):
             self.managers.append(MRManager(
-                self.rules[i][self.get_num_mapper()], 'm'))
+                self.rules[i].get_num_mapper(), 'm'))
             self.managers.append(MRManager(
-                self.rules[i][self.get_num_reducer()], 'r'))
+                self.rules[i].get_num_reducer(), 'r'))
         self.host = _host
 
-    def parseRules(self, confs):
+    def parseRules(self, rules):
         self.rules = []
-        for conf in confs:
+        for rule_item in rules:
             new_rule = MapReduceMatcherRule()
-            new_rule.set_rule(conf)
+            new_rule.set_rule(rule_item)
             self.rules.append(new_rule)
 
     def initMetric(self, modules):
@@ -367,71 +379,40 @@ class SumMatcher:
                 names.append(name)
         return names
 
-def test1():
-    PATH.PROCPID_CMDLINE='./test/proc/%d/cmdline'
-    PATH.PROCPID_STATUS='./test/proc/%d/status'
-    PATH.PROCPID_STAT='./test/proc/%d/stat'
-    PATH.PROCPID_IO='./test/proc/%d/io'
-
-    f = open("./test/conf1.txt", "r")
-    lines = f.readlines()
-    f.close()
-    conf = ''
-    for line in lines:
-        conf += line
-    matcher = SubtreeMatcher(conf)
-    modules = [ProcInfoStat(), ProcInfoStatus(), ProcInfoIO()]
-    summat  = SumMatcher()
-    matcher.initMetric(modules)
-    summat.initMetric(modules)
-    print matcher.listMetricName()
-    print summat.listMetricName()
-
-    plist = {}
-    proc = ProcInfo(1, plist, modules)
-    plist[1] = proc
-    proc.update(0)
-    matcher.startGroup()
-    matcher.check(proc)
-    stdoutr = StdoutReporter()
-    matcher.report(2, stdoutr)
-
-    proc.update(5)
-    matcher.startGroup()
-    matcher.check(proc)
-    matcher.report(2, stdoutr)
-
-def test2():
-    f = open("./test.txt", "r")
-    conf = f.readlines()
-    f.close()
-    matcher = SubtreeMatcher(conf, "localhost")
-    modules = [ProcInfoStat(), ProcInfoStatus(), ProcInfoIO()]
-    matcher.initMetric(modules)
-    plist = {}
-    pid = 1856
-    proc = ProcInfo(pid, plist, modules)
-    plist[pid] = proc
-    proc.update(0)
-    matcher.startGroup()
-    matcher.check(proc)
-    stdoutr = StdoutReporter()
-    matcher.report(2, stdoutr)
-
-def test3():
-    f = open("./mrtask.conf", "r")
-    conf = f.readlines()
-    f.close()
-    matcher = MapReduceMatcher(conf, "localhost")
+def test():
+    import config
+    config_parser = config.ProcmonConfigParser()
+    mrconf = config_parser.load_mrtask_config('../../etc/mrtask.xml')
+    matcher = MapReduceMatcher(mrconf, "localhost")
     modules = [ProcInfoStat(), ProcInfoStatus(), ProcInfoIO()]
     matcher.initMetric(modules)
     plist = ProcMon()
-    pid = 30538
+    pid = 1
     proc = ProcInfo(pid, plist, modules)
     plist.procs[pid] = proc
-    proc.update(0)
+    proc.update(10)
     proc.prepare_tree()
-    #proc.cmd = "4j12-1.4.3.jar:/usr/local/sw/hadoop/build/ivy/lib/Hadoop/common/commons-el-1.0.jar:/usr/local/sw/hadoop/build/ivy/lib/Hadoop/common/core-3.1.1.jar:/usr/local/sw/hadoop/build/ivy/lib/Hadoop/common/servlet-api-2.5-6.1.14.jar:/usr/local/sw/hadoop/build/ivy/lib/Hadoop/common/jetty-6.1.14.jar:/usr/local/sw/hadoop/build/ivy/lib/Hadoop/common/log4j-1.2.15.jar:/usr/local/sw/hadoop/build/ivy/lib/Hadoop/common/slf4j-api-1.4.3.jar:/usr/local/sw/hadoop/build/ivy/lib/Hadoop/common/xmlenc-0.52.jar:/usr/local/sw/hadoop/build/ivy/lib/Hadoop/common/jets3t-0.6.1.jar:/usr/local/sw/hadoop/build/ivy/lib/Hadoop/common/commons-cli-1.2.jar:/usr/local/sw/hadoop/build/ivy/lib/Hadoop/common/commons-httpclient-3.0.1.jar:/usr/local/sw/hadoop/build/ivy/lib/Hadoop/common/jasper-runtime-5.5.12.jar:/usr/local/sw/hadoop/build/ivy/lib/Hadoop/common/jetty-util-6.1.14.jar:/usr/local/sw/hadoop/build/ivy/lib/Hadoop/common/junit-3.8.1.jar::/l/b2/scratch/hadoop-data/global/mapred/local/taskTracker/jobcache/job_201106031747_0066/jars/classes:/l/b2/scratch/hadoop-data/global/mapred/local/taskTracker/jobcache/job_201106031747_0066/jars:/l/d2/scratch/hadoop-data/global/mapred/local/taskTracker/jobcache/job_201106031747_0066/attempt_201106031747_0066_r_000000_1/work -Dhadoop.log.dir=/l/a2/scratch/hadoop-data/global/log -Dhadoop.root.logger=INFO,TLA -Dhadoop.tasklog.taskid=attempt_201106031747_0066_r_000000_1 -Dhadoop.tasklog.totalLogFileSize=0 org.apache.hadoop.mapred.Child 127.0.0.1 44373 attempt_201106031747_0066_r_000000_1 -1985077290"
+    proc.cmd = "4j12-1.4.3.jar:/usr/local/sw/hadoop/build/ivy/lib/Hadoop/common/commons-el-1.0.jar:/usr/local/sw/hadoop/build/ivy/lib/Hadoop/common/core-3.1.1.jar:/usr/local/sw/hadoop/build/ivy/lib/Hadoop/common/servlet-api-2.5-6.1.14.jar:/usr/local/sw/hadoop/build/ivy/lib/Hadoop/common/jetty-6.1.14.jar:/usr/local/sw/hadoop/build/ivy/lib/Hadoop/common/log4j-1.2.15.jar:/usr/local/sw/hadoop/build/ivy/lib/Hadoop/common/slf4j-api-1.4.3.jar:/usr/local/sw/hadoop/build/ivy/lib/Hadoop/common/xmlenc-0.52.jar:/usr/local/sw/hadoop/build/ivy/lib/Hadoop/common/jets3t-0.6.1.jar:/usr/local/sw/hadoop/build/ivy/lib/Hadoop/common/commons-cli-1.2.jar:/usr/local/sw/hadoop/build/ivy/lib/Hadoop/common/commons-httpclient-3.0.1.jar:/usr/local/sw/hadoop/build/ivy/lib/Hadoop/common/jasper-runtime-5.5.12.jar:/usr/local/sw/hadoop/build/ivy/lib/Hadoop/common/jetty-util-6.1.14.jar:/usr/local/sw/hadoop/build/ivy/lib/Hadoop/common/junit-3.8.1.jar::/l/b2/scratch/hadoop-data/global/mapred/local/taskTracker/jobcache/job_201106031747_0066/jars/classes:/l/b2/scratch/hadoop-data/global/mapred/local/taskTracker/jobcache/job_201106031747_0066/jars:/l/d2/scratch/hadoop-data/global/mapred/local/taskTracker/jobcache/job_201106031747_0066/attempt_201106031747_0066_r_000000_1/work -Dhadoop.log.dir=/l/a2/scratch/hadoop-data/global/log -Dhadoop.root.logger=INFO,TLA -Dhadoop.tasklog.taskid=attempt_201106031747_0066_r_000000_1 -Dhadoop.tasklog.totalLogFileSize=0 org.apache.hadoop.mapred.Child 127.0.0.1 44373 attempt_201106031747_0066_r_000000_1 -1985077290"
+    matcher.startGroup()
+    matcher.check(proc)
+    matcher.endGroup()
+    stdoutr = StdoutReporter()
+    matcher.report(2, stdoutr)
+
+def test2():
+    import config
+    config_parser = config.ProcmonConfigParser()
+    procmonconf = config_parser.load_procmon_config('../../etc/procmon.xml')
+    matcher = SubtreeMatcher(procmonconf, "localhost")
+    modules = [ProcInfoStat(), ProcInfoStatus(), ProcInfoIO()]
+    matcher.initMetric(modules)
+    plist = ProcMon()
+    pid = 1
+    proc = ProcInfo(pid, plist, modules)
+    plist.procs[pid] = proc
+    proc.update(10)
+    proc.prepare_tree()
+    proc.cmd = 'pvfs2-client-core --child -a 5 -n -5 --logtype file'
     matcher.startGroup()
     matcher.check(proc)
     matcher.endGroup()
@@ -439,4 +420,4 @@ def test3():
     matcher.report(2, stdoutr)
 
 if __name__ == '__main__':
-    test3()
+    test()

@@ -1,15 +1,22 @@
-<configuratio>
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<configuration>
   <processes>
 <!-- List all the processes to monitor -->
     <process>
-        <pid> 0 </pid>
-        <uid> 0  </uid>
-        <cmdline> .*org.apache.hadoop.hdfs.server.datanode.DataNode.* </cmdline>
-        <displayname> DataNode </displayname>
+        <pid>0</pid>
+        <uid>0</uid>
+        <cmdline>.*org.apache.hadoop.hdfs.server.datanode.DataNode.*</cmdline>
+        <displayname>DataNode</displayname>
     </process>
     <process>
-        <cmdline> .*org.apache.hadoop.mapred.TaskTracker.* </cmdline>
-        <displayname> TaskTracker </displayname>
+        <cmdline>.*org.apache.hadoop.mapred.TaskTracker.*</cmdline>
+        <displayname>TaskTracker</displayname>
+    </process>
+    <process>
+      <cmdline>.*pvfs2-client-core.*</cmdline>
+      <displayname>PVFS</displayname>
     </process>
   </processes>
 </configuration>

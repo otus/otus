@@ -9,11 +9,11 @@ MAINPATH=os.path.dirname(os.path.abspath(__file__))+"/../"
 
 class MessageUDPHandler(SocketServer.BaseRequestHandler):
     """Handle requests from clients, and put them into message queue """
-    msg_queue = None 
+    msg_queue = None
 
     def handle(self):
         data = self.request[0].strip()
-        MessageUDPHandler.msg_queue.put(data) 
+        MessageUDPHandler.msg_queue.put(data)
 
 
 class ThreadedUDPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
@@ -50,7 +50,7 @@ def main():
     server_thread = threading.Thread(target=server.serve_forever)
     server_thread.setDaemon(True)
     server_thread.start()
-    
+
     while True:
         time.sleep(interval)
         for i in range(msg_queue.qsize()):
@@ -59,7 +59,7 @@ def main():
                 print item
             except Queue.Empty as e:
                 break
-        sys.stdout.flush() 
+        sys.stdout.flush()
 
 if __name__ == "__main__":
   main()

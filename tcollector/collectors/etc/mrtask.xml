@@ -1,0 +1,8 @@
+<configuration>
+  <mrtask>
+      <pid> 0 </pid>
+      <uid> 0  </uid>
+      <nmapper>  6  </nmapper>
+      <nreducer> 4  </nreducer>
+  </mrtask>
+</configuration>
