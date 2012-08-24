@@ -16,6 +16,7 @@ if __name__ == '__main__':
   attr = attribute.Attribute()
   attr.load(MAINPATH+"etc/jmx.conf")
   replist.config(attr)
+  attr.set("jmxcmd", MAINPATH+'lib/jmx/jmxclient.jar')
   daemon = jmxdaemon.JMXDaemon(replist, attr)
   daemon.config(attr)
   while True:
