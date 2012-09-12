@@ -62,7 +62,7 @@ class SubtreeMatcherRule:
            self._rule[self.RULE_IND_NUID] == pinfo.uid:
             return False
         if self._rule[self.RULE_IND_CMD] != '' and \
-           not re.match(self._rule[self.RULE_IND_CMD], pinfo.cmd):
+           re.match(self._rule[self.RULE_IND_CMD], pinfo.cmd) is None:
             return False
         return True
 
@@ -262,7 +262,7 @@ class MapReduceMatcherRule:
            self._rule[self.RULE_IND_NUID] == pinfo.uid:
             return False
         if self._rule[self.RULE_IND_CMD] != '' and \
-           not re.match(self._rule[self.RULE_IND_CMD], pinfo.cmd):
+           re.match(self._rule[self.RULE_IND_CMD], pinfo.cmd) is None:
             return False
         return True
 
